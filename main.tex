@@ -29,7 +29,7 @@ Qui si parla di drAI
 
 \subsection{LLM and Transformers}
 
-The developement of predictor models for categorical sequential data has historically been deeply
+The development of predictor models for categorical sequential data has historically been deeply
 intertwined with the text-generation and machine-translation tasks. In the most commons approaches,
 the text is divided in smaller portions called tokens, which usually represent a word, a suffix, a
 punctuation symbol, or in general an indivisible part of the language. Typical values for the number
@@ -137,12 +137,12 @@ according to $\hat{h}$. In the most simple version of the architecture, this mea
 dot product $h_i^\top \hat{h}$, but other differentiable functions of the two vectors could be used.
 Once the importances $x_0, ..., x_n$ are given, they are converted on a distribution probability
 over the hidden vectors of the encoder. This is done through the SoftMax function:
-$$ \\alpha_i = \frac{\exp (x_i)}{\sum_j \exp (x_j)}. $$ 
+$$ \alpha_i = \frac{\exp (x_i)}{\sum_j \exp (x_j)}. $$ 
 The idea is that the probability distribution measures how relevant is each hidden state for the
 current prediction, and thus how much attention should be given to each of them. The distribution is
 in fact called attention. With this in mind, the context vector is simply the mean of the hiddden
 states, weighted through the attention:
-$$ c = \sum_i \\alpha_i h_i. $$
+$$ c = \sum_i \alpha_i h_i. $$
 
 This is very important because attention allows the gradient to ``take shortcuts'' to get to the first
 layers without having to pass through all the following ones.
