@@ -8,31 +8,14 @@
 \usepackage{amsthm}
 \usepackage{color}
 \usepackage{graphicx}
-\usepackage{dsfont}
 \usepackage{subcaption}
-\usepackage{stmaryrd}
-\usepackage[section]{placeins}
+\usepackage{array}
 \graphicspath{ {./images/} }
-\usepackage{ebproof}
 
-\newcounter{basicblock}[section]
-\renewcommand{\thebasicblock}{\thesection.\arabic{basicblock}}
-% \renewcommand{\thebasicblock}{\arabic{basicblock}}
-\newenvironment{block}[1][]
-{\refstepcounter{basicblock}\par\medskip\noindent\textbf{#1~\thebasicblock}\quad}
-{ 
-\medskip}
- 
-\newenvironment{nlist}[1][i]
-{\begin{enumerate}[(#1)]
-    \setlength{\itemsep}{0pt}
-    \setlength{\parskip}{0pt}
-    \setlength{\topsep}{0pt}
-    \setlength{\parsep}{0pt}}
-{\end{enumerate}}
 
 \newcommand{\deb}[1]{\textcolor{red}{#1}}
 
+\renewcommand{\c}{\texttt}
 \renewcommand{\epsilon}{\varepsilon}
 \renewcommand{\phi}{\varphi}
 \renewcommand{\implies}{\Rightarrow}
@@ -44,6 +27,8 @@
 \renewcommand{\L}{\Lambda}
 \renewcommand{\P}{\Pi}
 \newcommand{\N}{\mathbb{N}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Ocompl}{\mathcal{O}}
 \newcommand{\arr}{\longrightarrow}
 \newcommand{\numer}[1]{\overline{#1}}
 \newcommand{\uni}{\mathcal{U}}
