@@ -1,0 +1,61 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{mstyle}[]
+
+\usepackage[utf8]{inputenc}
+\usepackage{amssymb}
+\usepackage{enumerate}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{color}
+\usepackage{graphicx}
+\usepackage{dsfont}
+\usepackage{subcaption}
+\usepackage{stmaryrd}
+\usepackage[section]{placeins}
+\graphicspath{ {./images/} }
+\usepackage{ebproof}
+
+\newcounter{basicblock}[section]
+\renewcommand{\thebasicblock}{\thesection.\arabic{basicblock}}
+% \renewcommand{\thebasicblock}{\arabic{basicblock}}
+\newenvironment{block}[1][]
+{\refstepcounter{basicblock}\par\medskip\noindent\textbf{#1~\thebasicblock}\quad}
+{ 
+\medskip}
+ 
+\newenvironment{nlist}[1][i]
+{\begin{enumerate}[(#1)]
+    \setlength{\itemsep}{0pt}
+    \setlength{\parskip}{0pt}
+    \setlength{\topsep}{0pt}
+    \setlength{\parsep}{0pt}}
+{\end{enumerate}}
+
+\newcommand{\deb}[1]{\textcolor{red}{#1}}
+
+\renewcommand{\epsilon}{\varepsilon}
+\renewcommand{\phi}{\varphi}
+\renewcommand{\implies}{\Rightarrow}
+\newcommand{\setof}[1]{\{#1\}}
+\newcommand{\ind}{\mathds{1}}
+\newcommand{\st}{\ |\ }
+\newcommand{\vl}{\text{VL}}
+\renewcommand{\l}{\lambda}
+\renewcommand{\L}{\Lambda}
+\renewcommand{\P}{\Pi}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\arr}{\longrightarrow}
+\newcommand{\numer}[1]{\overline{#1}}
+\newcommand{\uni}{\mathcal{U}}
+\newcommand{\ang}[1]{\langle #1 \rangle}
+\newcommand{\tint}{\text{Int}}
+\newcommand{\rar}{\rightarrow}
+\newcommand{\cod}[1]{\llbracket #1 \rrbracket}
+\newcommand{\one}{\text{\textbf{1}}}
+\newcommand{\ii}{\ensuremath{\text{\textbf{i}}}}
+
+\newcommand{\can}[1]{\mathcal{#1}}
+\newcommand{\reduce}{\rightsquigarrow}
+\newcommand{\conv}{\rightsquigarrow}
+\newcommand{\sub}[2]{[#1/#2]}
+\newcommand{\red}[1]{\text{RED}_{#1}}
