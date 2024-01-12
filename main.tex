@@ -175,10 +175,12 @@ $$ O_i = \sum_j \alpha_{i,j} V_j $$
 
 The previous relationships can be expressed in a more compact form seeing the vectors $K_i$, $Q_i$
 and $V_i$ as column of the matrices $K$, $Q$ and $V$. Thus we obtain:
-$$ O = \text{SoftMax} (Q K^\top/\sqrt{d_h})V $$  <self-attn>
+\begin{equation}\label{attn-ref}
+O = \text{SoftMax} (Q K^\top/\sqrt{d_h})V
+\end{equation}
 
 Since the keys, queries and values are obtained from the same set of vectors $e_i$, the expression
-@self-attn is called self-attention head.
+\ref{attn-ref} is called self-attention head.
 
 Usually more than a single self-attention head is present in a transformer layer. In an
 $m$-headed transformer there are $m$ triples of matrices $W_k^{(i)}$, $W_q^{(i)}$ and $W_v^{(i)}$,
@@ -292,13 +294,12 @@ with the following modifications.
   This choice has a nice property. Let $x_n$ and $x_m$ be the outputs of the previous layer. Then
   the attention importance relative to the $n$-th query and $m$-th key using the Rotary Embedding
   can be written as
-  \begin{align}
+  \begin{align}\label{rotary-importance}
    I_{n,m} &= (R_{\Theta, n}W_q x_n)^\top (R_{\Theta, m}W_k x_m) \\ 
-            &=  x_n^\top W_q^\top R_{\Theta, m-n} W_k x_m.
+            &=  x_n^\top W_q^\top R_{\Theta, m-n} W_k x_m. \nonumber
   \end{align}
-   <rotary-importance>
   The matrix $R_{\Theta, m-n}$ is an orthogonal matrix, which helps the flowing of the gradient
-  during training. Moreover from equation @rotary-importance we can see that this is a kind of
+  during training. Moreover from equation \ref{rotary-importance} we can see that this is a kind of
   relative encoding, which, in contrast with the absolute encoding, add informations only about the
   distance of two tokens, and not their position in the whole sentence. For many tasks this is a
   desirable property. One final remark is that the matrices $R_(Theta, n)$ are very sparse, and thus
