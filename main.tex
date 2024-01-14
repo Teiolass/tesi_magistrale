@@ -16,7 +16,45 @@
 \maketitle
 \newpage
 
-\section{ Introduction }
+\section{Introduction}
+
+Rapid growth of information systems in the healthcare sector has made large amounts of relevant
+available in the last decades. One very common form of this kind of data is the Electronic Health
+Records (EHR), which consists of a sequence of visit descriptions taken at irregualar time
+distances. Visits can consist in informations on the medical conditions, symptoms, diagnoses,
+medications and actions taken during the admission. World Health Organization (WHO) has made
+available a standard codification for these descriptions called International Classification of
+Diseases (ICD), which led to uniform data collected among different institution.
+
+Together with the data availability a need has grown for its analysis. One important task has been
+the prediction of future analysis given the patient history in the form of EHR. This is a non
+trivial task given the high dimensionality of the problem and its temporal dependency. However
+several approaches in the field of deep learning have been proposed, mainly based on recurrent
+architectures \deb{citazioni} and transformer-based architectures have been started to be explored
+\deb{altre citazioni}.
+
+Good predictors are not enough though. Models as critical as those in the healthcare sphere have to
+work in tandem with professionals. To increase the trustworthiness of the tools, predictions should
+not only good, but also understandable by humans. However, there are still no methods to explicit
+the inner reasoning of deep learning models in human terms. Work have been conducted in the last
+years to work around this limit, an important example being doctorXAI \cite{panigutti-xai}, which
+approximates the local behaviour of a black-box oracle with an intrisically explainable predictor.
+
+This thesis expands this works in three directions:
+\begin{enumerate}
+\item We substitute the underlying recurrent black-box model with a transformer based one, trained
+on more data. This allows for better performances in the predictions.
+
+\item We propose a new method for generating a synthetic neighborhood which should be aware of the
+underlying data distribution. This would allow for more thorough exploration of the local behaviour
+of the black-box. The process would be done by adding noise to real data, and then extracting
+samples over a distribution for the possible reconstruction given by a deep learning model.
+
+\item We try to understand some parts of the transformer black-box model through the lens of the
+local explanation. In particular we will notice some correlation between the attention score given
+by the self-attention heads in the transformer and the feature importances given by the tree in the
+local explanation pipeline.
+\end{enumerate}
 
 \section{Related}
 
@@ -268,53 +306,53 @@ with the following modifications.
 \item Normalization Layer... \deb{Questo qui non c'è in Kelso}
 
 \item The positional encoding have been replaced by Rotary Position Embeddings. The idea is to add
-  positional information at each layer of the model, modifying the key and query vectors by a
-  suitable function dependent by time. Let this modification be represented by the functions 
-  $f_k(y_n, n)$ and $f_q(y_n, n)$, where $y_n$ is the $n$-th vector of the previous layer or the
-  token embedding  multiplied by the matrix $W_k$ or $W_q$. Let's assume that the hidden dimension
-  to be an even number $d$, which is reasonable since for performance reasons typical values of
-  dimensions are large powers of two or some of their multiples. Then a good choice could be
-  $$ f_{\{q, k}\}(y_n, n) = R_{\Theta, n} y_m $$
-  where $R_(Theta, n)$ is a matrix in the following form:
-  $$
-        R_{\Theta, n} = \begin{pmatrix} 
-          R(n \theta_1)& 0& \dots& 0 \\
-          0& R(n \theta_2)& \dots& 0 \\
-          \vdots& \vdots& \ddots& \vdots \\
-          0&0& \dots& R(n \theta_{d / 2})
-        \end{pmatrix},
-  $$
-  $$
-        R(\theta) = \begin{pmatrix} 
-            \cos\theta & -\sin\theta \\ \sin\theta & \cos\theta
-        \end{pmatrix},
-  $$
-  and $\Theta = \{ \theta_1, \dots, \theta_{d / 2} \}$ with $\theta_i = 10000^{-2(i-1) / d}$.
+positional information at each layer of the model, modifying the key and query vectors by a
+suitable function dependent by time. Let this modification be represented by the functions 
+$f_k(y_n, n)$ and $f_q(y_n, n)$, where $y_n$ is the $n$-th vector of the previous layer or the
+token embedding  multiplied by the matrix $W_k$ or $W_q$. Let's assume that the hidden dimension
+to be an even number $d$, which is reasonable since for performance reasons typical values of
+dimensions are large powers of two or some of their multiples. Then a good choice could be
+$$ f_{\{q, k}\}(y_n, n) = R_{\Theta, n} y_m $$
+where $R_(Theta, n)$ is a matrix in the following form:
+$$
+    R_{\Theta, n} = \begin{pmatrix} 
+      R(n \theta_1)& 0& \dots& 0 \\
+      0& R(n \theta_2)& \dots& 0 \\
+      \vdots& \vdots& \ddots& \vdots \\
+      0&0& \dots& R(n \theta_{d / 2})
+    \end{pmatrix},
+$$
+$$
+    R(\theta) = \begin{pmatrix} 
+        \cos\theta & -\sin\theta \\ \sin\theta & \cos\theta
+    \end{pmatrix},
+$$
+and $\Theta = \{ \theta_1, \dots, \theta_{d / 2} \}$ with $\theta_i = 10000^{-2(i-1) / d}$.
 
-  This choice has a nice property. Let $x_n$ and $x_m$ be the outputs of the previous layer. Then
-  the attention importance relative to the $n$-th query and $m$-th key using the Rotary Embedding
-  can be written as
-  \begin{align}\label{rotary-importance}
-   I_{n,m} &= (R_{\Theta, n}W_q x_n)^\top (R_{\Theta, m}W_k x_m) \\ 
-            &=  x_n^\top W_q^\top R_{\Theta, m-n} W_k x_m. \nonumber
-  \end{align}
-  The matrix $R_{\Theta, m-n}$ is an orthogonal matrix, which helps the flowing of the gradient
-  during training. Moreover from equation \ref{rotary-importance} we can see that this is a kind of
-  relative encoding, which, in contrast with the absolute encoding, add informations only about the
-  distance of two tokens, and not their position in the whole sentence. For many tasks this is a
-  desirable property. One final remark is that the matrices $R_(Theta, n)$ are very sparse, and thus
-  the computation of the products can be performed in a $\Ocompl(d)$ complexity.
+This choice has a nice property. Let $x_n$ and $x_m$ be the outputs of the previous layer. Then
+the attention importance relative to the $n$-th query and $m$-th key using the Rotary Embedding
+can be written as
+\begin{align}\label{rotary-importance}
+I_{n,m} &= (R_{\Theta, n}W_q x_n)^\top (R_{\Theta, m}W_k x_m) \\ 
+        &=  x_n^\top W_q^\top R_{\Theta, m-n} W_k x_m. \nonumber
+\end{align}
+The matrix $R_{\Theta, m-n}$ is an orthogonal matrix, which helps the flowing of the gradient
+during training. Moreover from equation \ref{rotary-importance} we can see that this is a kind of
+relative encoding, which, in contrast with the absolute encoding, add informations only about the
+distance of two tokens, and not their position in the whole sentence. For many tasks this is a
+desirable property. One final remark is that the matrices $R_(Theta, n)$ are very sparse, and thus
+the computation of the products can be performed in a $\Ocompl(d)$ complexity.
 
 \item The MLP layers has been replaced with a Swish Gated Linear Unit (SwiGLU). The function Swish
-  is defined as 
-  $$ \text{Swish}(x) = x \sigma(x) $$
-  where $\sigma$ is the sigmoid function. Given a hidden dimension of the model $d_h$ and a new
-  dimension $d_\text{MLP}$ for the MLP, we define the Gated Linear Unit as be parametrized by the
-  $W_\text{gate}$, $W_\text{up}$ and $W_\text{down}$, of size $d_h\times d_\text{MLP}$ for the first two, and $d_\text{MLP}
- \times d_h$ for the last one. Let's denote the component-wise multiplication of two vectors with
-  the symbol $\odot$. Then the layer is defined as
-  $$ \text{MLP}(x) = W_\text{down} (\text{Swish}(W_\text{gate} x) \odot W_\text{up} x) $$
-  This approach has been proven to have a better behaviour than a plain MLP layer.
+is defined as
+$$ \text{Swish}(x) = x \sigma(x) $$
+where $\sigma$ is the sigmoid function. Given a hidden dimension of the model $d_h$ and a new
+dimension $d_\text{MLP}$ for the MLP, we define the Gated Linear Unit as be parametrized by the
+$W_\text{gate}$, $W_\text{up}$ and $W_\text{down}$, of size $d_h\times d_\text{MLP}$ for the first
+two, and $d_\text{MLP} \times d_h$ for the last one. Let's denote the component-wise multiplication
+of two vectors with the symbol $\odot$. Then the layer is defined as $$ \text{MLP}(x) =
+W_\text{down} (\text{Swish}(W_\text{gate} x) \odot W_\text{up} x) $$ This approach has been proven
+to have a better behaviour than a plain MLP layer.
 \end{enumerate}
 
 \subsection{Explainability }
