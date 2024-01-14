@@ -97,9 +97,9 @@ by the gradient in the starting point. This means that the update is meaningless
 matrices consistently decrease the magnitude of the gradient, the update of the SGD will be near
 zero, and the model will fail to converge.
 
-Several attempts to solve this problem have been tried by modifing the inner architecture of the
+Several attempts to solve this problem have been tried by modifying the inner architecture of the
 recurrent net, and the most notable examples of that are the Gate Recurrent Units (GRUs) and the
-Long Short Term Memory models (LSTMs). These are however only mitigations of the problem, and not a
+Long Short Term Memory models (LSTMs). These are however only a mitigation of the problem, and not a
 complete solution.
 
 One first possible modification, that does not solve the gradient problem but still improves the
@@ -144,10 +144,10 @@ $$ c = \sum_i \alpha_i h_i. $$
 This is very important because attention allows the gradient to ``take shortcuts'' to get to the first
 layers without having to pass through all the following ones.
 
-One importnt way to scale up in size and complextity all the previous models is to have several
+One important way to scale up in size and complexity all the previous models is to have several
 layer the recurrent architectures. These leads to have a first layer similar to the ones described
 before: it takes as an input the previous hidden state, the embedding of a token, and in some cases
-a contex vector. Each of the subsequent layers takes in input the previous hidden state for that
+a context vector. Each of the subsequent layers takes in input the previous hidden state for that
 layer, the hidden state of the previous layer, and sometimes the context vector.
 
 \subsubsection{Transformers}
@@ -249,7 +249,7 @@ learning models are trained using minibatches of data for each step. This can be
 running multiple ``single pass'' steps, one for each element of the minibatch, and accumulating the
 gradient. It may be more perfomant to deal with the minibatch in a single pass. This can be done by
 concatenating all the data for the minibatch in a new dimension of the matrices, and the model
-doesn't change much to accomodate this modification. However in general the sequence length will not
+doesn't change much to accommodate this modification. However in general the sequence length will not
 be constant through the minibatch. Thus all the sequences are padded to the max length within the
 minibatch, and the attention mask is tweaked to avoid that any output depends on a padding token.
 
@@ -270,8 +270,8 @@ with the following modifications.
 \item The positional encoding have been replaced by Rotary Position Embeddings. The idea is to add
   positional information at each layer of the model, modifying the key and query vectors by a
   suitable function dependent by time. Let this modification be represented by the functions 
-  $f_k(y_n, n)$ and $f_q(y_n, n)$, where $y_n$ is the $n$-th vector of the previous layeror the
-  token embedding  mutliplied by the matrix $W_k$ or $W_q$. Let's assume that the hidden dimension
+  $f_k(y_n, n)$ and $f_q(y_n, n)$, where $y_n$ is the $n$-th vector of the previous layer or the
+  token embedding  multiplied by the matrix $W_k$ or $W_q$. Let's assume that the hidden dimension
   to be an even number $d$, which is reasonable since for performance reasons typical values of
   dimensions are large powers of two or some of their multiples. Then a good choice could be
   $$ f_{\{q, k}\}(y_n, n) = R_{\Theta, n} y_m $$
@@ -343,11 +343,11 @@ we decomposition is given by
 $$ \mu(p) = \mu_0(v_1) \mu_\text{next} (v_2 | (v_1)) \mu_\text{next} (v_3 |
     (v_1, v_2)) \cdots \mu_\text{next} (v_k | (v_1, \dots, v_{k-1})) $$
 where $\mu_0$ is a probability distribution over the initial visits $\visits$, and $\mu_\text{next}$ is a
-probability distribution over the next visit given the preceeding ones. In other words $\mu_\text{next} (v
+probability distribution over the next visit given the preceding ones. In other words $\mu_\text{next} (v
 | p')$ is the probability of $v$ being the next observed visit after seeing all the visits in $p'$.
 \deb{Probabilmente ci dovrebbe essere una 'visita terminale' per dire quando la sequnza finisce.}
 
-A predictor model $h(\cdot, \theta)$ parametrized by a vector of parameters $\theta \in \R^d$, for some
+A predictor model $h(\cdot, \theta)$ parameterized by a vector of parameters $\theta \in \R^d$, for some
 number of dimensions $d$, is a function
 $$ h(\cdot, \theta) : \patients \arr [0,1]^{|\codes|}. $$
 The underlying idea is for $h$ to be a predictor of the next visit for a given patient. In fact we
@@ -367,8 +367,8 @@ In many fields, and in particular the medical one, which is of our interest, som
 is not just made of indistinguishable labels, but rather by leaf-nodes of a tree. This can be
 formally described as follows. Let $\codesin$ be a set of ``inner nodes'', and let $\codes' = \codes
 \cup \codesin$. Let $\tree$ be a tree with nodes $\codes'$ and whose leaves are all and only the
-codes $\codes$. This tree is called ontology and gives some informations over the codes in $\codes$
-that appeares in the dataset. We will assume that codes that are closer with respect to the distance
+codes $\codes$. This tree is called ontology and gives some information over the codes in $\codes$
+that appaeres in the dataset. We will assume that codes that are closer with respect to the distance
 on the graph $\tree$ to be more similar than codes that are less close.
 
 As done in \cite{panigutti-xai} we proceed to describe a distance on the possible patients $\patients$. To
@@ -391,7 +391,7 @@ distance weighted through the Wu-Palmer similarity. However would need to choose
 the codes of each visit, while the codes do not have a natural order. For this reason we will follow
 a different approach. Let $V_A = \{c^A_1, ..., c^A_a\}$ and $V_B = \{c^B_1,..., c^B_b\}$ be two visits
 composed by $a$ and $b$ codes respectively. For each code in $V_A$ we choose the best similar code
-in $V_B$. We them sum all of the distances between the best pairs to get an asymetric distance:
+in $V_B$. We them sum all of the distances between the best pairs to get an asymmetric distance:
 $$ d^\visits _\text{asym} (V_A, V_B) = \sum_{i=1}^a \min_{j=1...b} \text{WuP}(v^A_i, v^B_j). $$
 We can symmetrize the above expression taking the maximum of the two permutations:
 $$ d^\visits  (V_A, V_B) = \max(d^\visits _\text{asym} (V_A, V_B), d^\visits _\text{asym} (V_B, V_A)). $$
@@ -489,14 +489,14 @@ admission table, a couple icd-version and icd-code, and a numerical priority ran
 ranks the importance of the codes within the same visit.
 
 ICD, the International Classification of Diseases, which is a system to classify diagnostic
-statements mantained by the World Health Organizaton (WHO). There are several versions of these
+statements maintained by the World Health Organization (WHO). There are several versions of these
 codes, and Mimic-iv uses ICD-9 and ICD-10. The version is flagged in a specific column of the
 diagnoses table. A code may indicate signs, symptoms, abnormal findings, complaints, social
 circumstances, and external causes of injury or disease. In \ref{table:icd_examples} are reported some examples
 of ICD-10 codes. ICD-9 codes are very similar.
 
-\begin{center}
 \begin{table}
+\begin{center}
 \begin{tabular}{  c  l  }
     \hline
     Code & Description \\ 
@@ -514,8 +514,8 @@ of ICD-10 codes. ICD-9 codes are very similar.
 \end{tabular}
 \caption{Table todo}
 \label{table:icd_examples}
-\end{table}
 \end{center}
+\end{table}
 
 In the diagnoses table of the Mimic-iv dataset there are 2,766,877 ICD-9 codes (58\% of the total)
 and 1,989,449 codes (42\% of the total). Considering codes with different versions of ICD
