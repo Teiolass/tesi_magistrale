@@ -42,15 +42,15 @@ approximates the local behaviour of a black-box oracle with an intrisically expl
 
 This thesis expands this work in three directions:
 \begin{enumerate}
-\item We substitute the underlying recurrent black-box model with a transformer based one, trained
+\item \emph{On learning a black box model:} We substitute the underlying recurrent black-box model with a transformer based one, trained
 on more data. This allows for better performances in the predictions.
 
-\item We propose a new method for generating a synthetic neighborhood which should be aware of the
+\item \emph{On generating explanations:}  We propose a new method for generating a synthetic neighborhood which should be aware of the
 underlying data distribution. This would allow for more thorough exploration of the local behaviour
 of the black-box. The process would be done by adding noise to real data, and then extracting
 samples over a distribution for the possible reconstruction given by a deep learning model.
 
-\item We try to understand some parts of the transformer black-box model through the lens of the
+\item \emph{On explaining:} We try to understand some parts of the transformer black-box model through the lens of the
 local explanation. In particular we will notice some correlation between the attention score given
 by the self-attention heads in the transformer and the feature importances given by the tree in the
 local explanation pipeline.
