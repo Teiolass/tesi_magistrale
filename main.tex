@@ -545,7 +545,7 @@ of ICD-10 codes. ICD-9 codes are very similar.
     F32.0 & Mild depressive episode \\ 
     O80.0 & Spontaneous vertex delivery \\ 
     S81.0 & Open wound of knee \\ 
-    W58 &   Bitten or struck by crocodile or alligator \\ 
+    W58   & Bitten or struck by crocodile or alligator \\ 
     Z56.3 & Stressful work schedule \\ 
     Z72.0 & Tobacco use (Excl. tobacco dependence) \\ 
     \hline
@@ -568,8 +568,18 @@ prediction that can be compared with a ground truth at least two visits are nece
 of 92\% of patients has no more than five visits.
 
 A preprocess phase is done by deleting all the patients who have a single visit, and then a
-conversion from ICD-9 to ICD-10 is performed, such that all the models will work on a single
-ontology.
+conversion from ICD-10 to ICD-9 is performed, such that all the models will work on a single
+ontology. The data that follows will be referred to the subset of patients with at least two visits
+in the dataset.
+
+The conversion between the two versions of the codification is not straightforward, and some ICD-10
+codes can be mapped to more than a ICD-9 code. Moreover, the conversion table we used \deb{quale?}
+does not contain all the ICD-10 codes present in Mimic-iv. These are the 0.8\% of all the codes, and
+are assigned to a special ``not found'' class. When multiple conversions were available we chose a
+random one, as done in \cite{setor-paper}.
+
+We convert the ICD codes to another system called CCS. \deb{qui non trovo il paper, e in effetti
+tutti i paper che lo usano linkano solo al sito web...}
 
 \subsection{Analysis}
 
