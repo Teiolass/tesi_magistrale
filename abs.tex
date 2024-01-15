@@ -16,8 +16,8 @@
 
 Rapid growth of information systems in the healthcare sector has made large amounts of relevant
 available in the last decades. One very common form of this kind of data is the Electronic Health
-Records (EHR), which consists of a sequence of visit descriptions taken at irregualar time
-distances. Visits can consist in informations on the medical conditions, symptoms, diagnoses,
+Records (EHR), which consists of a sequence of visit descriptions taken at irregular time
+distances. Visits can consist in information on the medical conditions, symptoms, diagnoses,
 medications and actions taken during the admission. World Health Organization (WHO) has made
 available a standard codification for these descriptions called International Classification of
 Diseases (ICD), which led to uniform data collected among different institutions.
@@ -36,7 +36,7 @@ years to work around this limit, an important example being doctorXAI.
 
 DoctorXAI is composed by two parts: a black-box predictor, called doctorAI, and an explanation
 pipeline. The predictor is a model based on recurrent architecture with GRU cells. The explanation
-is done by training an intrinsically exaplainable model, a decision tree classifier, on a local
+is done by training an intrinsically explainable model, a decision tree classifier, on a local
 neighborhood of the data whose prediction has to be explained. The neighborhood generation is guided
 by a distance on the data points which is aware of the ontology present in the ICD codes.
 
