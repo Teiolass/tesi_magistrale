@@ -1,7 +1,7 @@
 \documentclass[]{marticle}
 \usepackage{mstyle}
 
-\title{\textbf{\huge Predictions with Explanation on Electronic Health Records with Transformer-based Models}}
+\title{\textbf{\huge Predicting and Explaining on Electronic Health Records  with Transformer-based Models: a use case}}
 \date{}
 \author{}
 
@@ -21,6 +21,12 @@ distances. Visits can consist in information on the medical conditions, symptoms
 medications and actions taken during the admission. World Health Organization (WHO) has made
 available a standard codification for these descriptions called International Classification of
 Diseases (ICD), which led to uniform data collected among different institutions.
+
+Examples of these kinds of data are the Mimic datasets. They are collections of patient
+demographics, symptoms, diagnoses, procedures and medical events gathered during the stays at the
+Beth Israeli Deaconess Medical Center. Data has been processed at the Massachusetts Institute of
+Technology. The last instance of the Mimic dataset is Mimic-iv, which improves on its predecessor in
+several ways, one of the most important ones being the number of patients present in the data.
 
 Together with the data availability a need has grown for its analysis. One important task has been
 the prediction of future analysis given the patient history in the form of EHR. This is a non
@@ -44,9 +50,10 @@ This thesis expands the previous work in three directions:
 \begin{enumerate}
 
 \item We substitute the underlying recurrent black-box model with a transformer-based one, trained
-on more data. We will show that our model gives predictions which are more accurate than those of
-doctorAI. We leverage on the flexibility of the positional encodings within the transformer
-architecture to deal with complex data shapes, in our case sequences of subsets of a label set.
+on more data, updating the dataset used from Mimic-iii to Mimic-iv . We will show that our model
+gives predictions which are more accurate than those of doctorAI. We leverage on the flexibility of
+the positional encodings within the transformer architecture to deal with complex data shapes, in
+our case sequences of subsets of a label set.
 
 \item We propose a new method for generating a synthetic neighborhood which should be aware of the
 underlying data distribution. This would allow for a more thorough exploration of the local behaviour

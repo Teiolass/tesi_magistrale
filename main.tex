@@ -359,7 +359,82 @@ to have a better behaviour than a plain MLP layer.
 
 - Carrellata di roba
 
-- DrXAI
+\subsubsection{DoctorXAI}
+
+\deb{Credo che abbia più senso se messa dopo le sezioni in cui descrivo il data-type e
+l'ontologia...}
+
+DoctorXAI \cite{panigutti-xai} is a tool composed by two distinct parts. A predictor, called
+doctorAI \cite{paper-doctor-ai}, and a novel explanation pipeline. \deb{Un capitolo a parte per
+doctorAI?} For the explanation, given a patient history $p$, a neighborhood $N$ is generated. Then an
+intrisically explainable predictor is trained on $N$. The final explanation is extracted from this
+latter predictor.
+
+\newcommand{\realds}{N_\text{real}}
+
+Let $\ds$ be a dataset of real patients for explanation purposes. Let $d$ be the patient-to-patient
+ontology-aware distance described in section \ref{sect-ontology}. We then extract from $\ds$ the $k$
+patients that are the closest to $p$ according to $d$. This will form the real neighborhood
+$\realds$ of $p$. The natural number $k$ is a parameter of the algorithm.
+
+The following step is to augment $\realds$ with synthetic patients. In order to not introduce too
+much noise into the final dataset $N$, synthetic patients are generated only through deletion from
+real patients. The deletion is performed in an ontology-aware manner, as follows: given a patient
+$p'\in \realds$, each code of its visits has a fixed probability $\theta\in [0,1]$ to be deleted. In
+addition let $D=\{c_1, c_2, \dots, c_r\}$ be the set of such codes chosen for deletion. Let $c'_i$
+be the parent of $c_i$ according to the ontology tree, for each $i=1,2,\dots,r$, and let $C'$ be the
+sets of the $c'_i$ codes. Then the generated synthetic patient $p'$ is equal to $p$ when all the
+codes whose parents appear in $C'$ have been deleted. We notice that for construction all the codes
+in $D$ are deleted. In other words if a code is deleted, all the children of its parent are deleted
+too.
+
+We then need to associate a next visit prediction to each element of the neighborhood. This is done
+by just running the black-box predictor on the data. A note on how the output is extracted should be
+done. In fact the actual output of the black box predictor is a real number between zero and one for
+each code, which defines the probability of that code to appear in the next visit according to the
+predictor. Since these kind of predictors are evaluated with reacall at $k_\text{rec}$ metrics, the
+predicted visit contains the $j$-th code when it is one of the first $k_\text{rec}$ most probable
+codes. \deb{Non ho mai parlato di questa metrica prima.}
+
+Since we are interested in explaing a specific prediction of a visit $v$, which thus contains
+exactly $k_\text{rec}$ codes, we restrict the target labels through the whole dataset $N$ to those
+codes. Therefore the target output has $k_\text{rec}$ dimensions.
+
+We then have a dataset consisting in couples of patient history and prediction. The goal is to fit a
+decision tree classifier on them, but unfortunatly one more step is needed to tackle the fact that
+trees can only work on tabular data while we are dealing with complex data shapes. The proposed
+solution is to encode all the codes in a single vector. Let $p=(v_1, v_2, \dots, v_n)$ be a patient
+to be encoded. Each visit can be encoded in a fixed-size vector through a one hot encoding. If
+$\codes$ is the set of all possible codes, the vector will have $|\codes|$ dimensions. Let
+$\hat{v_i}$ be the codification of the visit $v_i$. Then
+\begin{equation*}
+    (\hat{v_i})_j = \begin{cases}
+        1 &\text{if the $j$-th code appears in $\hat{v_i}$}  \\
+        0 &\text{otherwise}.
+    \end{cases}
+\end{equation*}
+
+Let $\lambda\in [0,1]$ be a fixed discount factor, parameter of the algorithm. In
+\cite{panigutti-xai} a value of $\lambda = 1/2$ is used. Then we can aggregate the vectors
+$\hat{v_i}$ with an exponential decay governed by the $\lambda$ factor. We thus obtain the final
+encoding
+\begin{equation*}
+    \hat{p} = \sum_{i=1}^r \lambda^{r-i+1} v_i.
+\end{equation*}
+
+A tree is then fitted on this data, the inputs being $|\codes|$-dimensional real vectors and the
+outputs being $k_\text{rec}$-dimensional vectors of zeros and ones. The explanation consists in the
+branches taken by the patient to be explained $p$ when classifing it according to the trained tree.
+
+Explanation are evaluated with three metrics:
+\begin{enumerate}
+\item Fidelity to the black box, which describes the perfomances of the tree predictions using the
+black-box as the ground-truth. This metric is evaluated on a held-out set taken from the
+neighborhood $N$. Since this is a multi-label classification task \cite{paper-multi-label}, a $F_1$
+score with micro averaging.
+
+
+\end{enumerate}
 
 \section{Problem Description}
 
@@ -399,7 +474,7 @@ The objective of a training process is to find an optimal parameter $\hat{\theta
 function $h(\cdot, \hat{\theta})$ is the best approximation of the distribution $\mu_\text{next}$. Since the
 latter is never known, we will use the empirical distribution found in the dataset $\ds$ as its proxy.
 
-\subsection{Ontology}
+\subsection{Ontology} \label{sect-ontology}
 
 In many fields, and in particular the medical one, which is of our interest, some categorical data
 is not just made of indistinguishable labels, but rather by leaf-nodes of a tree. This can be
@@ -533,7 +608,7 @@ diagnoses table. A code may indicate signs, symptoms, abnormal findings, complai
 circumstances, and external causes of injury or disease. In \ref{table:icd_examples} are reported some examples
 of ICD-10 codes. ICD-9 codes are very similar.
 
-\begin{table}
+\begin{table}[h]
 \begin{center}
 \begin{tabular}{  c  l  }
     \hline
@@ -550,7 +625,7 @@ of ICD-10 codes. ICD-9 codes are very similar.
     Z72.0 & Tobacco use (Excl. tobacco dependence) \\ 
     \hline
 \end{tabular}
-\caption{Table todo}
+\caption{\deb{Table todo}}
 \label{table:icd_examples}
 \end{center}
 \end{table}
