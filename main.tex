@@ -1,7 +1,7 @@
 \documentclass[]{marticle}
 \usepackage{mstyle}
 
-\title{\textbf{\huge Tesi}}
+\title{\textbf{\huge Predicting and Explaining on Electronic Health Records  with Transformer-based Models: a use case}}
 \date{}
 
 \newcommand{\ds}{\mathcal{D}}
@@ -42,18 +42,20 @@ approximates the local behaviour of a black-box oracle with an intrisically expl
 
 This thesis expands this work in three directions:
 \begin{enumerate}
-\item \emph{On learning a black box model:} We substitute the underlying recurrent black-box model with a transformer based one, trained
-on more data. This allows for better performances in the predictions.
+\item \emph{On learning a black box model:} We substitute the underlying recurrent black-box model
+with a transformer based one, trained on more data. This allows for better performances in the
+predictions.
 
-\item \emph{On generating explanations:}  We propose a new method for generating a synthetic neighborhood which should be aware of the
-underlying data distribution. This would allow for more thorough exploration of the local behaviour
-of the black-box. The process would be done by adding noise to real data, and then extracting
-samples over a distribution for the possible reconstruction given by a deep learning model.
+\item \emph{On generating explanations:}  We propose a new method for generating a synthetic
+neighborhood which should be aware of the underlying data distribution. This would allow for more
+thorough exploration of the local behaviour of the black-box. The process would be done by adding
+noise to real data, and then extracting samples over a distribution for the possible reconstruction
+given by a deep learning model.
 
-\item \emph{On explaining:} We try to understand some parts of the transformer black-box model through the lens of the
-local explanation. In particular we will notice some correlation between the attention score given
-by the self-attention heads in the transformer and the feature importances given by the tree in the
-local explanation pipeline.
+\item \emph{On explaining:} We try to understand some parts of the transformer black-box model
+through the lens of the local explanation. In particular we will notice some correlation between the
+attention score given by the self-attention heads in the transformer and the feature importances
+given by the tree in the local explanation pipeline.
 \end{enumerate}
 
 \section{Related}
@@ -433,12 +435,24 @@ black-box as the ground-truth. This metric is evaluated on a held-out set taken 
 neighborhood $N$. Since this is a multi-label classification task \cite{paper-multi-label}, a $F_1$
 score with micro averaging.
 
+\item A hit score, which measures how often the tree and the black-box models agree on the patient
+to be explained. This is computed as the Hamming-distance between the two outputs.
 
+\item A measure of complexity of the explanation. This is the depth of the leaf in the decision tree
+corresponding to the patient to be explained, and represents the length of the explanation. This is
+important because longer rules may be difficult to interpret by humans \cite{paper-lipton}.
 \end{enumerate}
+
+We can observe that there is a tradeoff to be done between the first two metrics and the third. In
+fact deeper trees can lead to better agreements between the black-box and the explainable
+classifier, but will lead to longer explanations.
+
+\deb{We also notice that there is no metric available to understand how well the synthetic
+neighborhood represents the data distribution...}
 
 \section{Problem Description}
 
-\subsection{Data Type}
+\subsection{Data Type} \label{sect-datashape}
 
 Let $\codes$ be a finite set of discrete elements called codes. A visit is defined as any subset
 of $\codes$. A patient is defined as a finite ordered sequence of visits. A code is allowed to
@@ -561,6 +575,102 @@ algorithm is $\Ocompl(m^2n^2)$.
 \subsection{Solution Proposal}
 
 \section{Implementation of the Solution}
+
+\subsection{Black-Box Model}
+
+We build a new black-box model based on transformer architecture modyfing the Llama LLM \deb{cito il
+mio capitolo o il paper?}. We observe that the shape of the data of a LLM is simpler than the one we
+are dealing with. In fact text is defined in this context as a pure sequence of tokens, while our
+medical data is a sequence of sets of labels, as described in section \ref{sect-datashape}.
+
+We will take advantage of the flexibility of the positional embeddings to pass the structure of the
+data to the model. Let $p=(v_1, v_2, \dots, v_n)$ be a patient, where $v_i=\{c^{(i)}_1, c^{(i)}_2,
+\dots, c^{(i)}_{m_i}\}$ are visits for $i=1,2,\dots, n$. Let $p'$ be the flattened sequence of codes
+in $p$, in which the order within each visit is arbitrarily chosen:
+\begin{equation*}
+    p' = (c^{(1)}_1, c^{(1)}_2, \dots, c^{(1)}_{m_1}, c^{(2)}_1, \dots, c^{(2)}_{m_2}, c^{(3)}_1,
+    \dots, c^{(n)}_{m_n}).
+\end{equation*}
+
+Then let $q$ be the sequence of natural numbers that specify the positional encoding, where $q_j$ is
+equal to $r$ if $p'_j$ is a code corresponding to the $r$-th visit in $p$. We can then feed to the
+transformer model the vector $p'$ to look up for the corresponding embeddings, one for each code,
+and the vector $q$ to set the correct positional embedding. Since the positional embeddings are the
+only part of the transformer where positions matters, the choice of the order of the codes when
+forming the vector $p'$ does not affect the final result.
+
+We notice that this could not be performed in a recurrent architecture, since permutations in the
+order of the codes necessarily lead to different results.
+
+Together with the tweaked positional embeddings a modification to the decoder mask should be done.
+In fact keys and queries associated to codes within the same visit should be always allowed to
+interact with each other. The mask should still prohibit codes in the future visits to ``look
+into'' codes of previous visits. Thus the mask $M$ must have a block-wise triangular form, as
+follows:
+\begin{equation*}
+    M_{i,j} = \begin{cases}
+        0       & \text{when $q_i\leq q_j$} \\
+        -\infty & \text{otherwise.}
+    \end{cases}
+\end{equation*}
+
+At this stage the model is able to correctly handle the input data and its structure. However
+transformers do not change the shape of the data, but while the input of the model has a length
+equal to the number of the codes of the patient, the output should have a length equal to the number
+of the visits. Since in general in the final layer of the transformer there will be a vector for
+each code in $p'$, we adopt an additional layer to aggregate all the vectors regarding codes of the
+same visit into a single one. This is called a pooling layer. We present two different versions of
+it.
+
+The simplest one performs a simple component wise average over the vectors to be aggregated. This
+keeps the same ``consideration'' for each code in the visit, and has the nice properties to be
+differentiable (which is needed for SGD), invariant under the permutations of the codes, and
+the resulting vector does not have bigger magnitude for longer visits, as a sum would lead to.
+
+The second version is parametrized, and allows for different codes to contribute in different
+amounts to the visit vector. Let $O$ be the output of the transformer, so it is a $m \times h$
+matrix, where $m$ is the number of the codes in the visit $m=\sum_i m_i$, and $h$ is the hidden
+dimension. We pass $O$ trough an additional transformer layer to obtain a sort of ``importance''
+matrix $X$. The transformer layer is made up as usual by a multi-self-attention head and a MLP
+layer. Since the objective of this layer is to pool together the codes in the same visit, the
+positional embeddings are disabled, and the mask allows keys and queries vectors to interact only if
+they are relative to codes within the same visit. More formally, the mask $M$ is defined as 
+\begin{equation*}
+    M_{i,j} = \begin{cases}
+        0       & \text{when $q_i = q_j$} \\
+        -\infty & \text{otherwise.}
+    \end{cases}
+\end{equation*}
+
+We now have to act on $X$ such that we can define a probability vector over each visit. We do this
+separately for each of the $h$ dimensions of the hidden vectors. As usual this conversion is done
+with a SoftMax function. Let $Y$ the output of this operation and $j$ a selected column,
+$j\in\{1,2,\dots h\}$. The matrix $Y$ will have the same shape of $X$. Let $i$ a selected row index,
+$i\in \{1,2,\dots m\}$, such that the it corresponds to the $k$-th visit. Let $a$ and $b$ the index
+of the first and last codes respectively in that visit. This means that 
+\begin{equation*}
+    a = \sum_{r < k} m_r + 1
+\end{equation*}
+and 
+\begin{equation*}
+    b = \sum_{r \leq k} m_r.
+\end{equation*}
+
+Then we define
+\begin{equation*}
+   Y_{[a:b], j} = \text{SoftMax}(X_{[a:b], j})
+\end{equation*}
+where $Y_{[a:b], j}$ denotes the vector such that $(Y_{[a:b], j})_l = Y_{a+l-1, j}$ for ${{l=1,..., b-1}}$.
+
+The resulting Matrix of the pooling is computed by summing all the vectors in $X\odot Y$
+corresponding to each visit.
+
+With both the versions of the pooling head, the output is a matrix of shape $n \times h$ where $n$
+is the number of visits. A simple linear layer will be enough to bring the output at a shape equals
+to $n \times |\codes|$ that represent the logits for the presence of each codes in the prediction.
+
+Of course only the last vector will be used for inference, but the whole matrix is needed for the
+training.
 
 \section{Experiments}
 
