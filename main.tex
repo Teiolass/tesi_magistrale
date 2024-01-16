@@ -305,7 +305,12 @@ sizes: 7B, 13B, 34B and 70B, where the number counts the number of trainable par
 model. The architecture is the same transformer-based decoder described in the previous section,
 with the following modifications.
 \begin{enumerate}
-\item Normalization Layer... \deb{Questo qui non c'è in Kelso}
+\item The normalization layers, used to prevent internal covariate shifts, are substituted with Root
+Mean Square layer normalizations (RMSNorm) \cite{paper-rmsnorm}. The usual normalization layers
+performs affine transformations on the hidden states such that the activations in a layer have mean
+zero and standard deviation one. RMSNorm simply scales those activation such that the root mean
+square is zero. This has showed to perform almost as better as the original version in terms of
+loss, but is faster to compute.
 
 \item The positional encoding have been replaced by Rotary Position Embeddings. The idea is to add
 positional information at each layer of the model, modifying the key and query vectors by a
@@ -672,7 +677,11 @@ to $n \times |\codes|$ that represent the logits for the presence of each codes 
 Of course only the last vector will be used for inference, but the whole matrix is needed for the
 training.
 
-This model is trained with a Adam algorithm with Decoupled Weight Decay Regularization
+Another modification over the original Llama model is that we use the standard normalization layer
+instead of RMSNorm. We make this choice because training times are not very long with the amount of
+data we have.
+
+This model is trained with an Adam algorithm with Decoupled Weight Decay Regularization
 \cite{paper-adamw}. For each visit to be predicted the loss is computed as the code-by-code binary
 cross-entropy. This is then summed over the codes and averaged over all the visits of the minibatch.
 
