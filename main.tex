@@ -361,7 +361,7 @@ to have a better behaviour than a plain MLP layer.
 
 - Carrellata di roba
 
-\subsubsection{DoctorXAI}
+\subsubsection{DoctorXAI} \label{sect-drxai}
 
 \deb{Credo che abbia più senso se messa dopo le sezioni in cui descrivo il data-type e
 l'ontologia...}
@@ -576,7 +576,7 @@ algorithm is $\Ocompl(m^2n^2)$.
 
 \section{Implementation of the Solution}
 
-\subsection{Black-Box Model}
+\subsection{Black-Box Model} \label{sect-kelso}
 
 We build a new black-box model based on transformer architecture modyfing the Llama LLM \deb{cito il
 mio capitolo o il paper?}. We observe that the shape of the data of a LLM is simpler than the one we
@@ -658,7 +658,7 @@ and
 
 Then we define
 \begin{equation*}
-   Y_{[a:b], j} = \text{SoftMax}(X_{[a:b], j})
+   Y_{[a:b], j} = \text{SoftMax}(X_{[a:b], j}),
 \end{equation*}
 where $Y_{[a:b], j}$ denotes the vector such that $(Y_{[a:b], j})_l = Y_{a+l-1, j}$ for ${{l=1,..., b-1}}$.
 
@@ -671,6 +671,69 @@ to $n \times |\codes|$ that represent the logits for the presence of each codes 
 
 Of course only the last vector will be used for inference, but the whole matrix is needed for the
 training.
+
+This model is trained with a Adam algorithm with Decoupled Weight Decay Regularization
+\cite{paper-adamw}. For each visit to be predicted the loss is computed as the code-by-code binary
+cross-entropy. This is then summed over the codes and averaged over all the visits of the minibatch.
+
+We performed a hyperparameter selection with a complete search running the candidate models for a
+fixed amount of epochs, and choosing the best on the metrics obtained on a held-out validation set
+of the data.
+
+The final model is then trained until the metrics on the validation set stop getting better. The
+model is then evaluated on another held-out test set.
+
+\subsection{Generative Explanation Pipeline}
+
+Our second proposal is about the generation of the synthetic neighborhood for the explanation
+pipeline. We start as in section \ref{sect-drxai} with a real neighborhood $\realds$ of patients
+selected to be as close as possible to the patient to be explained $p$. The notion of ``closeness''
+is again formalized by the ontology-aware visit-to-visit distance of section \ref{sect-ontology}.
+
+The ontology pipeline modifies the real patients only by deletion, to avoid introducing noise into
+the neighborhood. That would mean having to run the black-box model on patients out of the original
+distribution of the data. Our goal is to find a way to explore the neighborhood of $p$ by augmenting
+the the real neighbors with new codes that are plausible. The idea is to have a model that codifies
+the distribution of the data, and let the generative process be guided by that model.
+
+\deb{Ispirazione da stable diffusion?}
+
+We build a model that is able to reconstruct the original patients from noisy ones. Given a real
+patient $p_r$, the noise is added by masking some randomly chosen codes present in their visit with
+a special code \c{hole}. The input has thus the same shape as described in section \ref{sect-kelso},
+but the codes vector is able to contain the new special code.
+
+The model is then composed by the following stack of layers:
+\begin{enumerate}
+\item An embedding layer that associates each code to a $h$-dimensional vector. It can accept
+$|\codes|+1$ distinct codes.
+
+\item Several transformer layers. These are built in the same way as in section \ref{sect-kelso},
+with all the care needed to encode the correct structure of the data through the positional
+embeddings and the decoder masks.
+
+\item An output layer which is a simple linear function that shifts the dimension of the data from
+$n \times h$, which is the output of the transformer, to $n \times |\codes|$.
+
+\item A final SoftMax function, which converts the logits of the output layer into vector of
+probability over the codes.
+\end{enumerate}
+
+The procedure for generating a synthetic patient from a real one $p_r$ is done as follows:
+\begin{enumerate}
+\item The codes of $p_r$ are converted to their flattened form, and a vector of positional encodings
+$q$ is built during the process.
+
+\item Some codes chosen at random in the flattened patient are substituted with the \c{hole} code.
+
+\item The noisy patient is fed to the generative model. For each code in input we have a
+distribution of probability over the possible codes that can be placed in that position. We expect
+this probability to be near a deterministic identity function when restricted to the unmasked codes,
+and to reconstruct the original patients when restricted to the \c{hole} codes. \deb{???}
+
+\item New codes are sampled from the distributions corresponding to the \c{hole} codes. The sampled
+elements will substitute the \c{hole}s to obtain the final generated patient.
+\end{enumerate}
 
 \section{Experiments}
 
