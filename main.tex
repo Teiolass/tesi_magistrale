@@ -1,6 +1,8 @@
 \documentclass[]{marticle}
 \usepackage{mstyle}
 
+\graphicspath{ {./imgs/} }
+
 \title{\textbf{\huge Predicting and Explaining on Electronic Health Records  with Transformer-based Models: a use case}}
 \date{}
 
@@ -126,6 +128,22 @@ distribution given the previous ones. This is effectively a decomposition of the
 whole sentence. Thus the training is performed maximizing the likelihood of a dataset of human
 generated pairs of input and outputs.
 
+\begin{figure}[ht] 
+\begin{center}
+\includegraphics{recurrent_simple.pdf}
+\caption{\deb{Recurrent architecture, simple.}} 
+% \label{fig:your image label} 
+\end{center}
+\end{figure}
+
+\begin{figure}[] 
+\begin{center}
+\includegraphics{recurrent_context.pdf}
+\caption{\deb{Recurrent architecture, with context.}} 
+% \label{fig:your image label} 
+\end{center}
+\end{figure}
+
 As in most of trainings of Neural Networks, the optimization is done through Stochastic Gradient
 Descent and backpropagation. This reveals the biggest weakness of recurrent architectures. Assuming
 the model has parsed $n$ tokens between inputs and outputs, which means that reasonable values for
@@ -153,7 +171,7 @@ and thus the model is called encoder. The second part of the problem is to take 
 and generate autoregressively the output, in fact decoding the vector into tokens. This second model
 is thus called decoder.
 
-A very import step for the evolution of these architectures has been in noticing that the hidden
+A very important step for the evolution of these architectures has been in noticing that the hidden
 state during the decoder phase of the process has two distinct functions: remembering the input, and
 remembering at which point of the output generation the model is at. This suggest that the two
 functions could be carried out by two different vectors. This can be easily accomplished by having
