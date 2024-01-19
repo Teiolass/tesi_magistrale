@@ -40,7 +40,7 @@ predictions should not only accurate but also understandable by humans. However,
 state-of the-art deep-learning models is still poorly understood. Work has been conducted in the
 last years to work around this limit, an important example being doctorXAI \cite{panigutti-xai}, an
 agnostic explainable model specifically built to leverage ontological information. Its core idea is
-to apporximate the local behaviour of a opaque model with an intrisically explainable predictor.
+to approximate the local behaviour of a opaque model with an intrisically explainable predictor.
 
 In this thesis we want to improve and fully understand the capabilities of doctorXAI. Our aim is to
 improve the predictive accuracy of the underlying model and to provide more insight into the
@@ -148,6 +148,14 @@ generated pairs of input and outputs.
 \begin{center}
 \includegraphics{context_with_attention.pdf}
 \caption{\deb{This is how we compute the context with attention}} 
+% \label{fig:your image label} 
+\end{center}
+\end{figure}
+
+\begin{figure}[!ht] 
+\begin{center}
+\includegraphics{self_attention_architecture.pdf}
+\caption{\deb{This is the architecture of a self attention head. This structure is repeated for every index $j$}} 
 % \label{fig:your image label} 
 \end{center}
 \end{figure}
@@ -282,14 +290,18 @@ of the transformer, which will have different inputs, $p_i$ is fixed among all t
 different choices for $p_i$. One is to have it completely learnable by SGD. Another is to fix it,
 usually to a vector in the following form:
 $$ p = \begin{pmatrix}
-\sin\frac{\omega i}{2^0} \\
-\cos\frac{\omega i}{2^0} \\
-\sin\frac{\omega i}{2^1} \\
-\cos\frac{\omega i}{2^1} \\
+% \sin\frac{\omega i}{2^0} \\
+\sin\omega^{1/d} i \\
+\cos\omega^{1/d} i \\
+\sin\omega^{2/d} i \\
+\cos\omega^{2/d} i \\
 \vdots \\
-\sin\frac{\omega i}{2^d} \\
-\cos\frac{\omega i}{2^d} \\
-\end{pmatrix} $$
+\sin\omega^{h/2d} i \\
+\cos\omega^{h/2d} i
+\end{pmatrix}
+$$
+
+where usually $\omega$ is taken to be 10,000.
 
 This kind of vectors has showed to perform well. A possible line of reasoning for its justification
 is that vectors of sines and cosines can be translated in time with just linear transformations,
@@ -869,14 +881,14 @@ tutti i paper che lo usano linkano solo al sito web...}
 
 \subsection{Analysis}
 
-\begin{figure}[ht] 
+\begin{figure}[!ht] 
 \center
 \includegraphics{kelso-train-loss.pdf}
 \caption{Loss for training Kelso} 
 % \label{fig:} 
 \end{figure}
 
-\begin{figure}[ht] 
+\begin{figure}[!ht] 
 \center
 \includegraphics{kelso-train-recall.pdf}
 \caption{Recalls for training Kelso} 

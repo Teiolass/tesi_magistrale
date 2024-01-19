@@ -54,7 +54,9 @@ we work in several directions.
 \begin{enumerate}
 \item \emph{On learning a black box model:} We substitute the underlying recurrent black-box model
 with a transformer-based one, trained on an updated version of the dataset. This allows for better
-performances in the predictions.
+performances in the predictions. We leverage on the flexibility of the positional encodings within
+the transformer architecture to deal with complex data shapes, in our case sequences of subsets of a
+label set.
 
 \item \emph{On generating explanations:}  We propose a new method for generating a synthetic
 neighborhood that should be aware of the underlying data distribution. This would allow for a more
@@ -65,7 +67,9 @@ reconstruction given by a deep learning model.
 \item \emph{On explaining:} We try to explore some parts of the transformer black-box model
 through the lens of the local explanation. In particular, we will notice some correlation between the
 attention score given by the self-attention heads in the transformer and the feature importance
-given by the tree in the local explanation pipeline.
+given by the tree in the local explanation pipeline. This gives interesting insights over the inner
+workings of a model very similar in structure to state of the art LLMs such as GPT-3.5 or Llama but
+smaller and easier to analyze.
 \end{enumerate}
 
 \end{document}
