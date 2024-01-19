@@ -14,13 +14,11 @@
 \textbf{Relatori:} Roberto Pellungrini, Fosca Giannotti
 \vspace{0.4cm}
 
-Rapid growth of information systems in the healthcare sector has made large amounts of relevant
-available in the last decades. One very common form of this kind of data is the Electronic Health
-Records (EHR), which consists of a sequence of visit descriptions taken at irregular time
-distances. Visits can consist in information on the medical conditions, symptoms, diagnoses,
-medications and actions taken during the admission. World Health Organization (WHO) has made
-available a standard codification for these descriptions called International Classification of
-Diseases (ICD), which led to uniform data collected among different institutions.
+Rapid growth of information systems in the healthcare sector has made large amounts of relevant data
+available in the last decades. One very important and rich form of this kind of data is the
+Electronic Health Records (EHR), among which we can find sequences of visit descriptions taken at
+irregular time distances. Visits can consist in informations on the medical conditions, symptoms,
+diagnoses, medications and actions taken during the admission. 
 
 Examples of these kinds of data are the Mimic datasets. They are collections of patient
 demographics, symptoms, diagnoses, procedures and medical events gathered during the stays at the
@@ -28,17 +26,20 @@ Beth Israeli Deaconess Medical Center. Data has been processed at the Massachuse
 Technology. The last instance of the Mimic dataset is Mimic-iv, which improves on its predecessor in
 several ways, one of the most important ones being the number of patients present in the data.
 
-Together with the data availability a need has grown for its analysis. One important task has been
-the prediction of future analysis given the patient history in the form of EHR. This is a non
-trivial task given the high dimensionality of the problem and its temporal dependency. However
-several approaches in the field of deep learning have been proposed, mainly based on recurrent
-architectures, while transformer-based architectures have just started to be explored.
+With large amounts of data available, a significant opportunity for the advancement of the quality
+of the services offered is presented through its analysis. One important task is the prediction of
+future analysis given the patient history in the form of EHR. This is a nontrivial task given the
+high dimensionality of the problem and its temporal dependencies. However several approaches in the
+field of deep learning have been proposed to tackle this task, mainly based on recurrent
+architectures while an exploration transformer-based architectures has just started.
 
-Good predictors are not enough though. Models as critical as those in the healthcare sphere have to
-work in tandem with professionals. To increase the trustworthiness of the tools, predictions should
-not only accurate, but also understandable by humans. However, there are still no methods to explicit
-the inner reasoning of deep learning models in human terms. Work have been conducted in the last
-years to work around this limit, an important example being doctorXAI. 
+Good predictive models are not enough though. Models as critical as those in the healthcare sphere
+have to work in tandem with professionals. To increase the trustworthiness of the models,
+predictions should not only accurate but also understandable by humans. However, inner logic of
+state-of the-art deep-learning models is still poorly understood. Work has been conducted in the
+last years to work around this limit, an important example being doctorXAI, an agnostic explainable
+model specifically built to leverage ontological information. Its core idea is to apporximate the
+local behaviour of a opaque model with an intrisically explainable predictor.
 
 DoctorXAI is composed by two parts: a black-box predictor, called doctorAI, and an explanation
 pipeline. The predictor is a model based on recurrent architecture with GRU cells. The explanation
@@ -46,27 +47,25 @@ is done by training an intrinsically explainable model, a decision tree classifi
 neighborhood of the data whose prediction has to be explained. The neighborhood generation is guided
 by a distance on the data points which is aware of the ontology present in the ICD codes.
 
-This thesis expands the previous work in three directions:
+In this thesis we want to improve and fully understand the capabilities of doctorXAI. Our aim is to
+improve the predictive accuracy of the underlying model and to provide more insight into the
+explanations provided by doctorXAI, to improve its usability and effectiveness for physicians. Thus
+we work in several directions.
 \begin{enumerate}
+\item \emph{On learning a black box model:} We substitute the underlying recurrent black-box model
+with a transformer-based one, trained on an updated version of the dataset. This allows for better
+performances in the predictions.
 
-\item We substitute the underlying recurrent black-box model with a transformer-based one, trained
-on more data, updating the dataset used from Mimic-iii to Mimic-iv . We will show that our model
-gives predictions which are more accurate than those of doctorAI. We leverage on the flexibility of
-the positional encodings within the transformer architecture to deal with complex data shapes, in
-our case sequences of subsets of a label set.
+\item \emph{On generating explanations:}  We propose a new method for generating a synthetic
+neighborhood that should be aware of the underlying data distribution. This would allow for a more
+thorough exploration of the local behavior of the predictive model. The process would be done by
+adding noise to real data and then extracting samples over a distribution for the possible
+reconstruction given by a deep learning model.
 
-\item We propose a new method for generating a synthetic neighborhood which should be aware of the
-underlying data distribution. This would allow for a more thorough exploration of the local behaviour
-of the black-box. The process is done by adding noise to real data, and then extracting
-samples over a distribution for the possible reconstructions given by a deep-learning model.
-
-\item We try to understand some parts of the transformer black-box model through the lens of the
-local explanation. In particular we will notice some correlation between the attention score given
-by the self-attention heads in the transformer and the feature importances given by the tree in the
-local explanation pipeline. This gives interesting insights over the inner workings of a model very
-similar in structure to state of the art LLMs such as GPT-3.5 or Llama but smaller and easier to
-analyze.
-
+\item \emph{On explaining:} We try to explore some parts of the transformer black-box model
+through the lens of the local explanation. In particular, we will notice some correlation between the
+attention score given by the self-attention heads in the transformer and the feature importance
+given by the tree in the local explanation pipeline.
 \end{enumerate}
 
 \end{document}
