@@ -128,7 +128,7 @@ distribution given the previous ones. This is effectively a decomposition of the
 whole sentence. Thus the training is performed maximizing the likelihood of a dataset of human
 generated pairs of input and outputs.
 
-\begin{figure}[!ht] 
+\begin{figure}[!h] 
 \begin{center}
 \includegraphics{recurrent_simple.pdf}
 \caption{\deb{Recurrent architecture, simple.}} 
@@ -136,7 +136,7 @@ generated pairs of input and outputs.
 \end{center}
 \end{figure}
 
-\begin{figure}[!ht] 
+\begin{figure}[!h] 
 \begin{center}
 \includegraphics{recurrent_context.pdf}
 \caption{\deb{Recurrent architecture, with context.}} 
@@ -144,7 +144,7 @@ generated pairs of input and outputs.
 \end{center}
 \end{figure}
 
-\begin{figure}[!ht] 
+\begin{figure}[!h] 
 \begin{center}
 \includegraphics{context_with_attention.pdf}
 \caption{\deb{This is how we compute the context with attention}} 
@@ -152,7 +152,7 @@ generated pairs of input and outputs.
 \end{center}
 \end{figure}
 
-\begin{figure}[!ht] 
+\begin{figure}[!h] 
 \begin{center}
 \includegraphics{self_attention_architecture.pdf}
 \caption{\deb{This is the architecture of a self attention head. This structure is repeated for every index $j$}} 
@@ -160,7 +160,7 @@ generated pairs of input and outputs.
 \end{center}
 \end{figure}
 
-\begin{figure}[!ht] 
+\begin{figure}[!h] 
 \begin{center}
 \includegraphics{transformer_architecture.pdf}
 \caption{\deb{This is the architecture of a simple LLM.}} 
@@ -637,6 +637,13 @@ mio capitolo o il paper?}. We observe that the shape of the data of a LLM is sim
 are dealing with. In fact text is defined in this context as a pure sequence of tokens, while our
 medical data is a sequence of sets of labels, as described in section \ref{sect-datashape}.
 
+\begin{figure}[!ht] 
+\center
+\includegraphics{kelso_architecture.pdf}
+\caption{\deb{Architettura di Kelso}} 
+% \label{fig:} 
+\end{figure}
+
 We will take advantage of the flexibility of the positional embeddings to pass the structure of the
 data to the model. Let $p=(v_1, v_2, \dots, v_n)$ be a patient, where $v_i=\{c^{(i)}_1, c^{(i)}_2,
 \dots, c^{(i)}_{m_i}\}$ are visits for $i=1,2,\dots, n$. Let $p'$ be the flattened sequence of codes
@@ -718,6 +725,13 @@ where $Y_{[a:b], j}$ denotes the vector such that $(Y_{[a:b], j})_l = Y_{a+l-1, 
 
 The resulting Matrix of the pooling is computed by summing all the vectors in $X\odot Y$
 corresponding to each visit.
+
+\begin{figure}[!ht] 
+\center
+\includegraphics{attention_pooling.pdf}
+\caption{\deb{Attention Pooling with Parameters Architecture}} 
+% \label{fig:} 
+\end{figure}
 
 With both the versions of the pooling head, the output is a matrix of shape $n \times h$ where $n$
 is the number of visits. A simple linear layer will be enough to bring the output at a shape equals
