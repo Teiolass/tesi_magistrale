@@ -26,15 +26,16 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
-     inkscape:zoom="2.9611953"
-     inkscape:cx="220.68791"
-     inkscape:cy="541.50431"
+     inkscape:zoom="2.8215649"
+     inkscape:cx="337.047"
+     inkscape:cy="736.29354"
      inkscape:window-width="1920"
-     inkscape:window-height="1028"
+     inkscape:window-height="1050"
      inkscape:window-x="0"
-     inkscape:window-y="52"
+     inkscape:window-y="30"
      inkscape:window-maximized="1"
-     inkscape:current-layer="layer1" />
+     inkscape:current-layer="layer1"
+     showgrid="false" />
   <defs
      id="defs1">
     <mask
@@ -86,6 +87,11 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1">
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 65.716112,193.86996 h 29.269094 v -1.76949"
+       id="path25"
+       sodipodi:nodetypes="ccc" />
     <path
        style="display:inline;fill:#e4b17e;fill-opacity:1;stroke-width:1.565;stroke-linecap:round"
        id="path1-5-2"
@@ -276,37 +282,51 @@
            y="107.67869"
            id="tspan3-7-1">Multiplication</tspan></text>
     </g>
+    <path
+       sodipodi:type="star"
+       style="display:inline;fill:#000000;fill-opacity:1;stroke-width:6.89077;stroke-linecap:round"
+       id="path3-0-78-0-8-9-7-3-6-6-8"
+       inkscape:flatsided="true"
+       sodipodi:sides="3"
+       sodipodi:cx="204.78735"
+       sodipodi:cy="172.9576"
+       sodipodi:r1="5.3916001"
+       sodipodi:r2="2.6958001"
+       sodipodi:arg1="2.108968"
+       sodipodi:arg2="3.1561655"
+       inkscape:rounded="0"
+       inkscape:randomized="0"
+       d="m 202.0238,177.58708 0.13608,-9.33754 8.0185,4.78662 z"
+       inkscape:transform-center-x="0.039283632"
+       inkscape:transform-center-y="-0.65938392"
+       transform="matrix(0,-0.19495346,0.26458332,0,33.146623,231.7122)" />
     <g
-       id="g6"
-       transform="translate(-14.147771,-2.937799)">
+       id="g5-5"
+       transform="translate(-36.336474,-36.372629)">
       <path
-         sodipodi:type="star"
-         style="display:inline;fill:#000000;fill-opacity:1;stroke-width:6.89077;stroke-linecap:round"
-         id="path3-0-78-0-8-9-7-3-6-6-8"
-         inkscape:flatsided="true"
-         sodipodi:sides="3"
-         sodipodi:cx="204.78735"
-         sodipodi:cy="172.9576"
-         sodipodi:r1="5.3916001"
-         sodipodi:r2="2.6958001"
-         sodipodi:arg1="2.108968"
-         sodipodi:arg2="3.1561655"
-         inkscape:rounded="0"
-         inkscape:randomized="0"
-         d="m 202.0238,177.58708 0.13608,-9.33754 8.0185,4.78662 z"
-         inkscape:transform-center-x="0.039283632"
-         inkscape:transform-center-y="-0.65938392"
-         transform="matrix(0,-0.19495346,0.26458332,0,47.294394,234.65)" />
-      <g
-         id="g5-5"
-         transform="translate(-22.188703,-33.43483)">
-        <path
-           style="fill:none;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-           d="m 115.2344,228.0616 v 3.83339"
-           id="path4-6"
-           sodipodi:nodetypes="cc" />
-      </g>
+         style="fill:none;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         d="m 115.2344,228.0616 v 3.83339"
+         id="path4-6"
+         sodipodi:nodetypes="cc" />
     </g>
+    <path
+       sodipodi:type="star"
+       style="display:inline;fill:#000000;fill-opacity:1;stroke-width:6.89077;stroke-linecap:round"
+       id="path27"
+       inkscape:flatsided="true"
+       sodipodi:sides="3"
+       sodipodi:cx="204.78735"
+       sodipodi:cy="172.9576"
+       sodipodi:r1="5.3916001"
+       sodipodi:r2="2.6958001"
+       sodipodi:arg1="2.108968"
+       sodipodi:arg2="3.1561655"
+       inkscape:rounded="0"
+       inkscape:randomized="0"
+       d="m 202.0238,177.58708 0.13608,-9.33754 8.0185,4.78662 z"
+       inkscape:transform-center-x="0.039283632"
+       inkscape:transform-center-y="-0.65938392"
+       transform="matrix(0,-0.19495346,0.26458332,0,27.957681,231.7122)" />
     <g
        id="g6-6"
        transform="translate(7.3052987,-2.937799)">
@@ -560,6 +580,14 @@
        d="m 105.86352,160.19252 34.03385,0"
        id="path9"
        sodipodi:nodetypes="cc" />
+    <rect
+       style="fill:#ffffff;stroke:none;stroke-width:0.165;stroke-linecap:round;stroke-dasharray:0.66, 0.66;fill-opacity:0.83173406"
+       id="rect29"
+       width="7.0677037"
+       height="2.7842414"
+       x="79.221001"
+       y="192.50793"
+       ry="0.051146258" />
     <text
        xml:space="preserve"
        style="font-size:2.82223px;line-height:1.25;font-family:'Latin Modern Math';-inkscape-font-specification:'Latin Modern Math, Normal';letter-spacing:0px;stroke-width:0.264583"
@@ -805,14 +833,14 @@
     <text
        xml:space="preserve"
        style="font-size:2.82223px;line-height:1.25;font-family:'Latin Modern Math';-inkscape-font-specification:'Latin Modern Math, Normal';letter-spacing:0px;stroke-width:0.264583"
-       x="88.357933"
+       x="88.604874"
        y="222.41681"
        id="text17"><tspan
          sodipodi:role="line"
          id="tspan17"
          style="stroke-width:0.264583"
-         x="88.357933"
-         y="222.41681">Input Hidden State</tspan></text>
+         x="88.604874"
+         y="222.41681">Codes Embeddings</tspan></text>
     <g
        inkscape:label=""
        transform="translate(99.571736,124.06459)"
@@ -902,14 +930,14 @@
     <text
        xml:space="preserve"
        style="font-size:2.82223px;line-height:1.25;font-family:'Latin Modern Math';-inkscape-font-specification:'Latin Modern Math, Normal';letter-spacing:0px;stroke-width:0.264583"
-       x="87.61351"
-       y="88.754707"
+       x="87.939476"
+       y="88.7547"
        id="text20"><tspan
          sodipodi:role="line"
          style="stroke-width:0.264583"
-         x="87.61351"
-         y="88.754707"
-         id="tspan21">Output Hidden State</tspan></text>
+         x="87.939476"
+         y="88.7547"
+         id="tspan21">Output Probabilities</tspan></text>
     <path
        sodipodi:type="star"
        style="display:inline;fill:#000000;fill-opacity:1;stroke-width:6.89077;stroke-linecap:round"
@@ -1154,5 +1182,57 @@
         </g>
       </g>
     </g>
+    <path
+       style="display:inline;fill:#e4b17e;fill-opacity:1;stroke-width:1.565;stroke-linecap:round"
+       id="path2"
+       sodipodi:type="arc"
+       sodipodi:cx="-193.86996"
+       sodipodi:cy="58.613808"
+       sodipodi:rx="4.0188084"
+       sodipodi:ry="7.1023045"
+       sodipodi:start="4.7038787"
+       sodipodi:end="4.4676648"
+       sodipodi:open="true"
+       sodipodi:arc-type="arc"
+       d="m -193.90417,51.51176 a 4.0188084,7.1023045 0 0 1 4.04384,6.622554 4.0188084,7.1023045 0 0 1 -3.50214,7.524942 4.0188084,7.1023045 0 0 1 -4.45723,-5.734322 4.0188084,7.1023045 0 0 1 2.97602,-8.201812"
+       transform="rotate(-90)" />
+    <text
+       xml:space="preserve"
+       style="font-size:2.82223px;line-height:1.25;font-family:'Latin Modern Math';-inkscape-font-specification:'Latin Modern Math, Normal';text-align:center;letter-spacing:0px;text-anchor:middle;stroke-width:0.264583"
+       x="58.612396"
+       y="192.59102"
+       id="text6"><tspan
+         sodipodi:role="line"
+         style="text-align:center;text-anchor:middle;stroke-width:0.264583"
+         x="58.612396"
+         y="192.59102"
+         id="tspan6">Visit</tspan><tspan
+         sodipodi:role="line"
+         style="text-align:center;text-anchor:middle;stroke-width:0.264583"
+         x="58.612396"
+         y="196.1188"
+         id="tspan15">Positions</tspan></text>
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 73.708982,193.86996 v -1.67537"
+       id="path26" />
+    <path
+       sodipodi:type="star"
+       style="display:inline;fill:#000000;fill-opacity:1;stroke-width:6.89077;stroke-linecap:round"
+       id="path28"
+       inkscape:flatsided="true"
+       sodipodi:sides="3"
+       sodipodi:cx="204.78735"
+       sodipodi:cy="172.9576"
+       sodipodi:r1="5.3916001"
+       sodipodi:r2="2.6958001"
+       sodipodi:arg1="2.108968"
+       sodipodi:arg2="3.1561655"
+       inkscape:rounded="0"
+       inkscape:randomized="0"
+       d="m 202.0238,177.58708 0.13608,-9.33754 8.0185,4.78662 z"
+       inkscape:transform-center-x="0.039283632"
+       inkscape:transform-center-y="-0.65938392"
+       transform="matrix(0,-0.19495346,0.26458332,0,49.233905,231.7122)" />
   </g>
 </svg>

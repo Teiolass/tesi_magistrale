@@ -635,13 +635,14 @@ algorithm is $\Ocompl(m^2n^2)$.
 We build a new black-box model based on transformer architecture modyfing the Llama LLM \deb{cito il
 mio capitolo o il paper?}. We observe that the shape of the data of a LLM is simpler than the one we
 are dealing with. In fact text is defined in this context as a pure sequence of tokens, while our
-medical data is a sequence of sets of labels, as described in section \ref{sect-datashape}.
+medical data is a sequence of sets of labels, as described in section \ref{sect-datashape}. The
+structure of our model is showed in Figure \ref{fig:kelso-architecture}.
 
 \begin{figure}[!ht] 
 \center
 \includegraphics{kelso_architecture.pdf}
-\caption{\deb{Architettura di Kelso}} 
-% \label{fig:} 
+\caption{Architecture of the black box model.} 
+\label{fig:kelso-architecture} 
 \end{figure}
 
 We will take advantage of the flexibility of the positional embeddings to pass the structure of the
@@ -688,14 +689,23 @@ keeps the same ``consideration'' for each code in the visit, and has the nice pr
 differentiable (which is needed for SGD), invariant under the permutations of the codes, and
 the resulting vector does not have bigger magnitude for longer visits, as a sum would lead to.
 
+\begin{figure}[!b] 
+\center
+\includegraphics{attention_pooling.pdf}
+\caption{Architecture of the Attention Pooling with parameters. This is an example with two vistis,
+but it can be generalized to any number of visits.}
+\label{fig:pooling-architecture} 
+\end{figure}
+
 The second version is parametrized, and allows for different codes to contribute in different
-amounts to the visit vector. Let $O$ be the output of the transformer, so it is a $m \times h$
-matrix, where $m$ is the number of the codes in the visit $m=\sum_i m_i$, and $h$ is the hidden
-dimension. We pass $O$ trough an additional transformer layer to obtain a sort of ``importance''
-matrix $X$. The transformer layer is made up as usual by a multi-self-attention head and a MLP
-layer. Since the objective of this layer is to pool together the codes in the same visit, the
-positional embeddings are disabled, and the mask allows keys and queries vectors to interact only if
-they are relative to codes within the same visit. More formally, the mask $M$ is defined as 
+amounts to the visit vector. Its architecture is showed in Figure \ref{fig:pooling-architecture}.
+Let $O$ be the output of the transformer, so it is a $m \times h$ matrix, where $m$ is the number of
+the codes in the visit $m=\sum_i m_i$, and $h$ is the hidden dimension. We pass $O$ trough an
+additional transformer layer to obtain a sort of ``importance'' matrix $X$. The transformer layer is
+made up as usual by a multi-self-attention head and a MLP layer. Since the objective of this layer
+is to pool together the codes in the same visit, the positional embeddings are disabled, and the
+mask allows keys and queries vectors to interact only if they are relative to codes within the same
+visit. More formally, the mask $M$ is defined as 
 \begin{equation*}
     M_{i,j} = \begin{cases}
         0       & \text{when $q_i = q_j$} \\
@@ -726,13 +736,6 @@ where $Y_{[a:b], j}$ denotes the vector such that $(Y_{[a:b], j})_l = Y_{a+l-1, 
 The resulting Matrix of the pooling is computed by summing all the vectors in $X\odot Y$
 corresponding to each visit.
 
-\begin{figure}[!ht] 
-\center
-\includegraphics{attention_pooling.pdf}
-\caption{\deb{Attention Pooling with Parameters Architecture}} 
-% \label{fig:} 
-\end{figure}
-
 With both the versions of the pooling head, the output is a matrix of shape $n \times h$ where $n$
 is the number of visits. A simple linear layer will be enough to bring the output at a shape equals
 to $n \times |\codes|$ that represent the logits for the presence of each codes in the prediction.
@@ -743,6 +746,12 @@ training.
 Another modification over the original Llama model is that we use the standard normalization layer
 instead of RMSNorm. We make this choice because training times are not very long with the amount of
 data we have.
+
+\deb{Questa parte va in Experiments?}
+A note on which codes are used should be made. Following the idea of other similar models
+\cite{setor-paper}, we use ICD codes as inputs and CCS codes as output. This allows us to have more
+accurate predictions than the case in which we used only CCS codes, while we keep a reasnable sized
+output dimension.
 
 This model is trained with an Adam algorithm with Decoupled Weight Decay Regularization
 \cite{paper-adamw}. For each visit to be predicted the loss is computed as the code-by-code binary
@@ -761,6 +770,8 @@ Our second proposal is about the generation of the synthetic neighborhood for th
 pipeline. We start as in section \ref{sect-drxai} with a real neighborhood $\realds$ of patients
 selected to be as close as possible to the patient to be explained $p$. The notion of ``closeness''
 is again formalized by the ontology-aware visit-to-visit distance of section \ref{sect-ontology}.
+We can also perform generative perturbations on a dataset of synthetic patients generated with
+ontological perturbations.
 
 The ontology pipeline modifies the real patients only by deletion, to avoid introducing noise into
 the neighborhood. That would mean having to run the black-box model on patients out of the original
@@ -807,6 +818,21 @@ and to reconstruct the original patients when restricted to the \c{hole} codes. 
 elements will substitute the \c{hole}s to obtain the final generated patient.
 \end{enumerate}
 
+\deb{Questa parte va in Experiments?}
+The generative model must have ICD codes as outputs in order to be compatible with the black-box
+model. To keep the output layer at a reasonable dimension we set the target codes to be slightly
+different by the original patinet to be reconstructed: we masked all the codes that are not between
+the $k_\text{out}$ most frequent codes in the dataset with a special ``\c{other}'' code. The outputs
+sampled to be ``\c{other}'' are then left blank in the final generated patient.
+
+For the training we selected two distinct possible losses to use: a multi-label categorical
+cross-entropy over all the codes $l_\text{all}$, masked or not, and a similar multi-label
+categorical cross-entropy computed only on the masked codes $l_\text{masked}$. Thus the final loss we
+used is a combination of the two through an hyperparameter $\lambda _\text{loss}$:
+$$ \text{Loss} = l_\text{all} + \lambda_\text{loss} l_\text{masked}. $$
+
+The training is performed as in the black-box model using the AdamW algorithm.
+
 \section{Experiments}
 
 \subsection{Mimic IV}
@@ -850,14 +876,14 @@ ICD, the International Classification of Diseases, which is a system to classify
 statements maintained by the World Health Organization (WHO). There are several versions of these
 codes, and Mimic-iv uses ICD-9 and ICD-10. The version is flagged in a specific column of the
 diagnoses table. A code may indicate signs, symptoms, abnormal findings, complaints, social
-circumstances, and external causes of injury or disease. In \ref{table:icd_examples} are reported some examples
-of ICD-10 codes. ICD-9 codes are very similar.
+circumstances, and external causes of injury or disease. In Table \ref{table:icd_examples} are
+reported some examples of ICD-10 codes. ICD-9 codes are very similar.
 
 \begin{table}[h]
 \begin{center}
 \begin{tabular}{  c  l  }
     \hline
-    Code & Description \\ 
+    \myalign{c}{Code} & \myalign{c}{Description} \\ 
     \hline
     A00.0 & Cholera due to Vibrio cholerae 01, biovar cholerae \\ 
     E66.0 & Obesity due to excess calories \\ 
@@ -870,7 +896,7 @@ of ICD-10 codes. ICD-9 codes are very similar.
     Z72.0 & Tobacco use (Excl. tobacco dependence) \\ 
     \hline
 \end{tabular}
-\caption{\deb{Table todo}}
+\caption{Some examples of ICD-10 diagnoses codes from different sections.}
 \label{table:icd_examples}
 \end{center}
 \end{table}
