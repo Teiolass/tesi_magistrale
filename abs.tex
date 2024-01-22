@@ -15,43 +15,18 @@
 \textbf{Relatori:} Roberto Pellungrini, Fosca Giannotti
 \vspace{0.5cm}
 
-Rapid growth of information systems in the healthcare sector has made large amounts of relevant data
-available in the last decades. Examples of these kinds of data are the Mimic datasets. They are
-collections of patient demographics, symptoms, diagnoses, procedures and medical events gathered
-during their stays at the Beth Israeli Deaconess Medical Center.
+The rapid growth of information systems in the healthcare sector has made large amounts of relevant
+data available in the last decades. The abundance of medical records facilitates the development of
+powerful AI tools capable of supporting physicians in diagnostics tasks. Good predictive models are
+not enough though. Models as critical as those in the healthcare sector need to be interpretable and
+explainable for healthcare experts. Thus explainability has become one of the most important topics
+in the modern machine-learning research landscape.
 
-With large amounts of data available, a significant opportunity for the advancement of the quality
-of the services offered is presented through its analysis. One important task is the prediction of
-future analysis given the patient history in the form of EHR. Several approaches in the field of
-deep learning have been proposed to tackle this task, mainly based on recurrent architectures while
-an exploration transformer-based architectures has just started.
-
-Good predictive models are not enough though. Models as critical as those in the healthcare sphere
-have to work in tandem with professionals. To increase the trustworthiness of the models,
-predictions should not only be accurate but also understandable by humans. An important example of
-predictive model with explanation is doctorXAI. 
-
-DoctorXAI is composed by two parts: an opaque predictor, called doctorAI, and an explanation
-pipeline. The explanation is built with an intrisically explainable predictor on a local
-neighborhood of the data to be explained.
-
-In this thesis we want to improve and fully understand the capabilities of doctorXAI. Thus we work
-in several directions.
-\begin{enumerate}
-\item \emph{On learning a black box model:} We substitute the underlying recurrent black-box model
-with a transformer-based one, trained on an updated version of the dataset. This allows for better
-performances in the predictions. We leverage on the flexibility of the positional encodings within
-the transformer architecture to deal with complex data shapes.
-
-\item \emph{On generating explanations:}  We propose a new method for generating a synthetic
-neighborhood that should be aware of the underlying data distribution. This would allow for a more
-thorough exploration of the local behavior of the predictive model.
-
-\item \emph{On explaining:} We try to explore some parts of the transformer black-box model
-through the lens of the local explanation. In particular, we will notice some correlation between the
-attention score given by the self-attention heads in the transformer and the feature importance
-given by the tree in the local explanation pipeline.
-\end{enumerate}
+In this thesis we study and improve upon an explainable AI system for sequential healthcare records,
+doctorXAI. We improve on the underlying recurrent machine learning model with a transformer-based
+solution, then we propose new generative methods to enhance the explanation produced by the system.
+Finally we analyse the output of the system finding interesting correlations between the attention
+of the transformer and the produced explanation.
 
 \end{document}
 
