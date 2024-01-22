@@ -14,61 +14,41 @@
 \textbf{Relatori:} Roberto Pellungrini, Fosca Giannotti
 
 Rapid growth of information systems in the healthcare sector has made large amounts of relevant data
-available in the last decades. One very important and rich form of this kind of data is the
-Electronic Health Records (EHR), among which we can find sequences of visit descriptions taken at
-irregular time distances. Visits can consist in informations on the medical conditions, symptoms,
-diagnoses, medications and actions taken during the admission. 
-
-Examples of these kinds of data are the Mimic datasets. They are collections of patient
-demographics, symptoms, diagnoses, procedures and medical events gathered during the stays at the
-Beth Israeli Deaconess Medical Center. Data has been processed at the Massachusetts Institute of
-Technology. The last instance of the Mimic dataset is Mimic-iv, which improves on its predecessor in
-several ways, one of the most important ones being the number of patients present in the data.
+available in the last decades. Examples of these kinds of data are the Mimic datasets. They are
+collections of patient demographics, symptoms, diagnoses, procedures and medical events gathered
+during their stays at the Beth Israeli Deaconess Medical Center.
 
 With large amounts of data available, a significant opportunity for the advancement of the quality
 of the services offered is presented through its analysis. One important task is the prediction of
-future analysis given the patient history in the form of EHR. This is a nontrivial task given the
-high dimensionality of the problem and its temporal dependencies. However several approaches in the
-field of deep learning have been proposed to tackle this task, mainly based on recurrent
-architectures while an exploration transformer-based architectures has just started.
+future analysis given the patient history in the form of EHR. Several approaches in the field of
+deep learning have been proposed to tackle this task, mainly based on recurrent architectures while
+an exploration transformer-based architectures has just started.
 
 Good predictive models are not enough though. Models as critical as those in the healthcare sphere
 have to work in tandem with professionals. To increase the trustworthiness of the models,
-predictions should not only accurate but also understandable by humans. However, inner logic of
-state-of the-art deep-learning models is still poorly understood. Work has been conducted in the
-last years to work around this limit, an important example being doctorXAI, an agnostic explainable
-model specifically built to leverage ontological information. Its core idea is to apporximate the
-local behaviour of a opaque model with an intrisically explainable predictor.
+predictions should not only be accurate but also understandable by humans. An important example of
+predictive model with explanation is doctorXAI. 
 
-DoctorXAI is composed by two parts: a black-box predictor, called doctorAI, and an explanation
-pipeline. The predictor is a model based on recurrent architecture with GRU cells. The explanation
-is done by training an intrinsically explainable model, a decision tree classifier, on a local
-neighborhood of the data whose prediction has to be explained. The neighborhood generation is guided
-by a distance on the data points which is aware of the ontology present in the ICD codes.
+DoctorXAI is composed by two parts: an opaque predictor, called doctorAI, and an explanation
+pipeline. The explanation is built with an intrisically explainable predictor on a local
+neighborhood of the data to be explained.
 
-In this thesis we want to improve and fully understand the capabilities of doctorXAI. Our aim is to
-improve the predictive accuracy of the underlying model and to provide more insight into the
-explanations provided by doctorXAI, to improve its usability and effectiveness for physicians. Thus
-we work in several directions.
+In this thesis we want to improve and fully understand the capabilities of doctorXAI. Thus we work
+in several directions.
 \begin{enumerate}
 \item \emph{On learning a black box model:} We substitute the underlying recurrent black-box model
 with a transformer-based one, trained on an updated version of the dataset. This allows for better
 performances in the predictions. We leverage on the flexibility of the positional encodings within
-the transformer architecture to deal with complex data shapes, in our case sequences of subsets of a
-label set.
+the transformer architecture to deal with complex data shapes.
 
 \item \emph{On generating explanations:}  We propose a new method for generating a synthetic
 neighborhood that should be aware of the underlying data distribution. This would allow for a more
-thorough exploration of the local behavior of the predictive model. The process would be done by
-adding noise to real data and then extracting samples over a distribution for the possible
-reconstruction given by a deep learning model.
+thorough exploration of the local behavior of the predictive model.
 
 \item \emph{On explaining:} We try to explore some parts of the transformer black-box model
 through the lens of the local explanation. In particular, we will notice some correlation between the
 attention score given by the self-attention heads in the transformer and the feature importance
-given by the tree in the local explanation pipeline. This gives interesting insights over the inner
-workings of a model very similar in structure to state of the art LLMs such as GPT-3.5 or Llama but
-smaller and easier to analyze.
+given by the tree in the local explanation pipeline.
 \end{enumerate}
 
 \end{document}
