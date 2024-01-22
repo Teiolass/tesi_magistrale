@@ -16,7 +16,7 @@
 Rapid growth of information systems in the healthcare sector has made large amounts of relevant data
 available in the last decades. One very important and rich form of this kind of data is the
 Electronic Health Records (EHR), among which we can find sequences of visit descriptions taken at
-irregular time distances. Visits can consist in informations on the medical conditions, symptoms,
+irregular time distances. Visits can consist in information on the medical conditions, symptoms,
 diagnoses, medications and actions taken during the admission. 
 
 Examples of these kinds of data are the Mimic datasets. They are collections of patient
@@ -37,8 +37,8 @@ have to work in tandem with professionals. To increase the trustworthiness of th
 predictions should not only accurate but also understandable by humans. However, inner logic of
 state-of the-art deep-learning models is still poorly understood. Work has been conducted in the
 last years to work around this limit, an important example being doctorXAI, an agnostic explainable
-model specifically built to leverage ontological information. Its core idea is to apporximate the
-local behaviour of a opaque model with an intrisically explainable predictor.
+model specifically built to leverage ontological information. Its core idea is to approximate the
+local behaviour of a opaque model with an intrinsically explainable predictor.
 
 DoctorXAI is composed by two parts: a black-box predictor, called doctorAI, and an explanation
 pipeline. The predictor is a model based on recurrent architecture with GRU cells. The explanation
@@ -53,7 +53,7 @@ we work in several directions.
 \begin{enumerate}
 \item \emph{On learning a black box model:} We substitute the underlying recurrent black-box model
 with a transformer-based one, trained on an updated version of the dataset. This allows for better
-performances in the predictions. We leverage on the flexibility of the positional encodings within
+performances in the predictions. We leverage on the flexibility of the positional encoding within
 the transformer architecture to deal with complex data shapes, in our case sequences of subsets of a
 label set.
 
