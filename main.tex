@@ -3,7 +3,7 @@
 
 \graphicspath{ {./imgs/} }
 
-\title{\textbf{\huge Predicting and Explaining on Electronic Health Records  with Transformer-based Models: a use case}}
+\title{\textbf{\huge Predicting and Explaining on Electronic Health Records with Transformer-based Models}}
 \date{}
 
 \newcommand{\ds}{\mathcal{D}}
@@ -980,7 +980,7 @@ bold-face.}
 We trained the final model until the loss on the evaluation set stopped improving. The history of
 the loss over the evaluation set is showed in Figure \ref{fig:kelso-train-loss}. We also kept track
 of the recall metrics over the first 5, 10, 20 and 30 codes. The history of these metrics is showed
-in Figure \ref{fig:kelso-train-loss}.
+in Figure \ref{fig:kelso-train-recall}.
 
 \begin{figure}[!ht] 
 \makebox[\textwidth][c]{\includegraphics{kelso-train-loss.pdf}}
@@ -1005,6 +1005,54 @@ indicates the portion of the train set used. \deb{Titoli etc..}}
 \label{fig:kelso-partial-train} 
 \end{figure}
 
+\subsection{Explanation Pipeline}
+
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{  cccccccc  }
+    \hline
+      \myalign{c}{Neighs}
+    & \myalign{c}{Ont.}
+    & \myalign{c}{Gen.}
+    & \myalign{c}{Uni.}
+    & \myalign{c}{Fidelity}
+    & \myalign{c}{Corr/Max}
+    & \myalign{c}{Corr/Min}
+    & \myalign{c}{Corr/Avg} \\
+    \hline
+    100 & Yes & No  & No  & 80.1\% & 0.61 & -0.59 & 0.53 \\
+    100 & Yes & Yes & No  & 79.8\% & 0.60 & -0.57 & 0.51 \\
+    100 & Yes & Yes & Yes & 79.8\% & 0.58 & -0.56 & 0.51 \\
+    100 & No  & Yes & No  & 81.6\% & 0.49 & -0.48 & 0.43 \\
+    100 & No  & Yes & Yes & 81.6\% & 0.48 & -0.47 & 0.42 \\
+                                                         \\
+    200 & Yes & No  & No  & 80.1\% & 0.60 & -0.58 & 0.51 \\
+    200 & Yes & Yes & No  & 79.8\% & 0.59 & -0.57 & 0.51 \\
+    200 & Yes & Yes & Yes & 79.9\% & 0.59 & -0.57 & 0.51 \\
+    200 & No  & Yes & No  & 81.7\% & 0.53 & -0.51 & 0.46 \\
+    200 & No  & Yes & Yes & 81.8\% & 0.53 & -0.51 & 0.46 \\
+                                                         \\
+    400 & Yes & No  & No  & 79.9\% & 0.58 & -0.56 & 0.50 \\
+    400 & Yes & Yes & No  & 79.6\% & 0.56 & -0.55 & 0.49 \\
+    400 & Yes & Yes & Yes & 79.5\% & 0.57 & -0.56 & 0.49 \\
+    400 & No  & Yes & No  & 81.6\% & 0.54 & -0.52 & 0.47 \\
+    400 & No  & Yes & Yes & 81.7\% & 0.54 & -0.51 & 0.47 \\
+    \hline
+\end{tabular}
+\caption{
+    Results of the explanation pipeline. \textit{Neighs} is the size of the real neighborhood,
+    \textit{Ont.} shows whether or not the ontological perturbations are performed. \textit{Gen.}
+    shows whether or not the generative perturbations are performed. \textit{Uni.} shows whether the
+    generative perturbations were done with the transformer (value is No) or with uniform sampling
+    (value is Yes). The fidelity reports the fidelity of the tree model using the black-box
+    predictor as ground-truth. The three \textit{Corr} fields show the correlation beetween the
+    importances in the explanation and an aggregation of the attention in the transformer over all
+    layers. The three aggregations are the maximum (\textit{Max}), the minimum {\textit{Min}}, and
+    the average (\textit{Avg}).
+}
+\label{tab:explainer-res}
+\end{center}
+\end{table}
 \subsection{Analysis}
 
 
