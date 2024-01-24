@@ -926,21 +926,87 @@ random one, as done in \cite{setor-paper}.
 We convert the ICD codes to another system called CCS. \deb{qui non trovo il paper, e in effetti
 tutti i paper che lo usano linkano solo al sito web...}
 
+\subsection{Black-Box Model}
+
+Before training the final model, we performed a hyperparameter tune algorithm over the following
+hyperparameters:
+\begin{itemize}
+\item \textit{Hidden size}. This is the hidden size of the transformer, which is also equal to the
+    size of the embedding vectors.
+
+\item \textit{Number of layers}. It is the number of transformer layers present in the model.
+
+\item \textit{Number of attention heads}. Number of self-attention heads in the transformer.
+
+\item \textit{Attention head size}. This is the size of each key, query and value vector within each
+    single self-attention head.
+
+\item \textit{Learning rate}. This regulates the step size of the SGD algorithm.
+
+\item \textit{Intermediate size of MLPs}, which is the size of the projection in the gated MLPs of
+    the model
+
+\item \textit{Parametrized pooling head}. It is a boolean value, which indicates whether to use the
+    parametrized pooling head (when true), or the uniform one (when false).
+\end{itemize}
+
+We ran a complete hyperparameter search for choosing the best model, using the search space showed
+in Table \ref{tab:hyper-kelso}. The search was performed by training each candidate model for 20
+epochs, then we chose the model that showed the minimum loss on the evaluation set. \deb{The performance
+of the models are not heavily influnced by the choice of hyperparameters if they have enough
+trainable parameters. Most of the runs gave very similar results in facts.}
+
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{  c  l  }
+    \hline
+    \myalign{c}{hyperparameter} & \myalign{c}{Values} \\ 
+    \hline
+    Hidden size               & 63, \textbf{128}, 256        \\
+    Number of layers          & 1, \textbf{5}, 10            \\
+    Number of attention heads & \textbf{3}, 8                \\
+    Attention head size       & 15, \textbf{32}, 64          \\
+    Learning rate             & $\mathbf{9^{-3}}$, $10^{-4}$ \\
+    Intermediate size of MLPs & 255, 512, \textbf{1024}      \\
+    Parametrized pooling head & \textbf{True}, False         \\
+    \hline
+\end{tabular}
+\caption{hyperparameter search space for the black-box model. The selected parameters are showed in
+bold-face.}
+\label{tab:hyper-kelso}
+\end{center}
+\end{table}
+
+We trained the final model until the loss on the evaluation set stopped improving. The history of
+the loss over the evaluation set is showed in Figure \ref{fig:kelso-train-loss}. We also kept track
+of the recall metrics over the first 5, 10, 20 and 30 codes. The history of these metrics is showed
+in Figure \ref{fig:kelso-train-loss}.
+
+\begin{figure}[!ht] 
+\makebox[\textwidth][c]{\includegraphics{kelso-train-loss.pdf}}
+\caption{Loss history during the training of the predictor model.} 
+\label{fig:kelso-train-loss} 
+\end{figure}
+
+\begin{figure}[!ht] 
+\makebox[\textwidth][c]{\includegraphics{kelso-train-recall.pdf}}
+\caption{Recalls history during the training of the predictor model.}
+\label{fig:kelso-train-recall} 
+\end{figure}
+
+We tried also training the model over a portion of the training set, while keeping the evaluation
+and tests set at their original sizes. Figure \ref{fig:kelso-partial-train} shows the evaluation
+loss and recall metrics as a function of the size of the training set.
+
+\begin{figure}[!ht] 
+\makebox[\textwidth][c]{\includegraphics{kelso-partial-train.pdf}}
+\caption{Metrics on the test set for the model trained on partial data. The percentage on the x-axis
+indicates the portion of the train set used. \deb{Titoli etc..}}
+\label{fig:kelso-partial-train} 
+\end{figure}
+
 \subsection{Analysis}
 
-\begin{figure}[!ht] 
-\center
-\includegraphics{kelso-train-loss.pdf}
-\caption{Loss for training Kelso} 
-% \label{fig:} 
-\end{figure}
-
-\begin{figure}[!ht] 
-\center
-\includegraphics{kelso-train-recall.pdf}
-\caption{Recalls for training Kelso} 
-% \label{fig:} 
-\end{figure}
 
 \section{Conclusions}
 
