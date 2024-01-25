@@ -982,13 +982,13 @@ the loss over the evaluation set is showed in Figure \ref{fig:kelso-train-loss}.
 of the recall metrics over the first 5, 10, 20 and 30 codes. The history of these metrics is showed
 in Figure \ref{fig:kelso-train-recall}.
 
-\begin{figure}[!ht] 
+\begin{figure}[h] 
 \makebox[\textwidth][c]{\includegraphics{kelso-train-loss.pdf}}
 \caption{Loss history during the training of the predictor model.} 
 \label{fig:kelso-train-loss} 
 \end{figure}
 
-\begin{figure}[!ht] 
+\begin{figure}[!h] 
 \makebox[\textwidth][c]{\includegraphics{kelso-train-recall.pdf}}
 \caption{Recalls history during the training of the predictor model.}
 \label{fig:kelso-train-recall} 
@@ -998,7 +998,7 @@ We tried also training the model over a portion of the training set, while keepi
 and tests set at their original sizes. Figure \ref{fig:kelso-partial-train} shows the evaluation
 loss and recall metrics as a function of the size of the training set.
 
-\begin{figure}[!ht] 
+\begin{figure}[h] 
 \makebox[\textwidth][c]{\includegraphics{kelso-partial-train.pdf}}
 \caption{Metrics on the test set for the model trained on partial data. The percentage on the x-axis
 indicates the portion of the train set used. \deb{Titoli etc..}}
@@ -1047,7 +1047,7 @@ indicates the portion of the train set used. \deb{Titoli etc..}}
     (value is Yes). The fidelity reports the fidelity of the tree model using the black-box
     predictor as ground-truth. The three \textit{Corr} fields show the correlation beetween the
     importances in the explanation and an aggregation of the attention in the transformer over all
-    layers. The three aggregations are the maximum (\textit{Max}), the minimum {\textit{Min}}, and
+    layers. The three aggregations are the maximum (\textit{Max}), the minimum (\textit{Min}), and
     the average (\textit{Avg}).
 }
 \label{tab:explainer-res}
@@ -1055,6 +1055,45 @@ indicates the portion of the train set used. \deb{Titoli etc..}}
 \end{table}
 \subsection{Analysis}
 
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{  cccccccc  }
+    \hline
+      \myalign{c}{Neighs}
+    & \myalign{c}{Ont.}
+    & \myalign{c}{Gen.}
+    & \myalign{c}{Uni.}
+    & \myalign{c}{Fidelity}
+    & \myalign{c}{Corr/Max}
+    & \myalign{c}{Corr/Min}
+    & \myalign{c}{Corr/Avg} \\
+    \hline
+100 & Yes & No  & No  & 80.1\% & 0.29 & -0.1 & 0.03  \\
+100 & No  & Yes & No  & 81.7\% & 0.25 & -0.05 & 0.05  \\
+100 & No  & Yes & Yes & 81.6\% & 0.22 & -0.06 & 0.03  \\
+100 & Yes & Yes & No  & 79.9\% & 0.28 & -0.09 & 0.03  \\
+100 & Yes & Yes & Yes & 79.8\% & 0.29 & -0.08 & 0.03  \\
+\\
+200 & Yes & No  & No  & 80.0\% & 0.3 & -0.11 & 0.03  \\
+200 & No  & Yes & No  & 81.7\% & 0.27 & -0.07 & 0.04  \\
+200 & No  & Yes & Yes & 81.8\% & 0.25 & -0.07 & 0.04  \\
+200 & Yes & Yes & No  & 79.8\% & 0.28 & -0.1 & 0.02  \\
+200 & Yes & Yes & Yes & 79.9\% & 0.3 & -0.08 & 0.03  \\
+\\
+800 & Yes & No  & No  & 79.8\% & 0.28 & -0.11 & 0.03  \\
+800 & No  & Yes & No  & 81.3\% & 0.27 & -0.07 & 0.02  \\
+800 & No  & Yes & Yes & 81.3\% & 0.27 & -0.07 & 0.03  \\
+800 & Yes & Yes & No  & 79.4\% & 0.27 & -0.12 & 0.0  \\
+800 & Yes & Yes & Yes & 79.3\% & 0.27 & -0.12 & 0.0  \\
+    \hline
+\end{tabular}
+\caption{
+    Same thing as above, filtered on input codes
+}
+\label{tab:explainer-res}
+\end{center}
+\end{table}
+\subsection{Analysis}
 
 \section{Conclusions}
 
