@@ -13,6 +13,8 @@
 \newcommand{\patients}{\mathcal{P}}
 \newcommand{\visits}{\mathcal{V}}
 
+\DeclareMathOperator{\Red}{Red}
+\DeclareMathOperator{\FI}{FI}
 
 \begin{document}
 \maketitle
@@ -433,6 +435,111 @@ Following the taxonomy of \cite{xai-survey}, we classify the most common XAI tec
     the source of the predictions. Examples are the methods that work in tandem with deep-learning
     models.
 \end{itemize}
+
+Focusing on the post-hoc methods, we categorize explanation algorithms on two distinct axis. The
+first one describes what is being explained:
+\begin{itemize}
+\item \textit{Global} explainers try to explain the whole logic within the black-box model. The
+    explanation is thus valid for each instance of the data.
+
+\item \textit{Local} explainers on the other hand try to explain only a single prediction.
+\end{itemize}
+
+The second axis focus on the kind of information the explainer leverages on:
+\begin{itemize}
+\item \textit{Model-Specific} methods can use some data obtained from within the associated
+    prediction model. Examples are the gradient from deep-learning models or attention values from
+    transformer models.
+
+\item \textit{Model-Agnostic} methods can only use the predictions given by the black-box. This
+    means that any kind of black-box can be successfully used in tandem with this kind of
+    explainers.
+\end{itemize}
+
+We proceed to show some important groups of explanation techniques.
+
+\begin{itemize}
+
+\item \textit{Prototypes}. The user is presented with data which may taken from a dataset or
+    generated artificially, that gives examples similar to the input of the predictions that get a
+    similar prediction.
+
+\item \textit{Counterfactuals}. This method is similar to the prototypes, but work in the opposite
+    direction: the counterfactuals are data similar to the input but with different prediction.
+
+\item \textit{Feature importance}. This method is suited for tabular data, where each instance to be
+    explained is a sequence of features $(x_1, x_2, \dots, x_n)$. The explanation consists in a
+    vector $e=(e_1, e_2, \dots, e_n)$ where each component $e_i$ gives the importance of the
+    corresponding feature $x_i$. Usually e positive value of $e_i$ can be interpreted as the feature
+    $x_i$ contributing positively toward the given prediction, while negative values indicate that
+    the feature contributes negatively.
+
+\item \textit{Rule based}. The goal of this method is to find a set of rules that mimic the
+    black-box at least on a subset of the data near the input to be explained. A rule consists in a
+    boolean condition over the data and a prediction to be assigned when the condition is satisfied.
+
+\item \deb{Ce ne vanno altre?}
+\end{itemize}
+
+\subsubsection{Decision Tree Classifiers}
+
+An important example of intrinsically explainable models are the tree classifiers
+\cite{tibsharani-elements}, \cite{trees-breiman}. Let $\ds=(x^{(1)}, x^{(2)}, \dots, x^{(k)})$ be a
+dataset of $n$-dimensional vectors, and let $(y_1, y_2, \dots, y_k)$ be a sequence of labels from a
+finite set $\codes$. A decision tree classifier is a description of iterative splits of the
+$n$-dimensional space in partitions that contains data points $x_j$ with similar labels.
+
+A decision tree classifier is a binary tree whose nodes are represented by a couple $i, t$ where $i$
+is the index of a feature, so $i=1,\dots,n$, and $t\in\R$ is a threshold value. A subset of the
+dataset is associated to each node of the tree: the whole dataset is associated to the root node,
+and if the subset $D$ is associated to a non-leaf node $\theta = (i, t)$ then the subsets
+\begin{align*}
+    D_\text{left}  &= \{x \in D \ |\ x_i \leq t\} \\
+    D_\text{right} &= \{x \in D \ |\ x_i >    t\}
+\end{align*}
+are associated to its left and right child respectively. We finally associate a label to each leaf
+of the tree. Thus to each input $x$ the tree classifier predicts the label of the leaf associated to
+$x$ through the rules.
+
+One of the most common ways of finding a good decision tree is the CART algorithm
+\cite{tibsharani-elements}. We first associate a number that measures the quality of the split in
+each inner node.
+\begin{equation*}
+    G(\theta) = \frac{|D_\text{left}|}{|D|} H(D_\text{left}) + \frac{|D_\text{right}|}{|D|}
+    H(D_\text{right})
+\end{equation*}
+where the function $H(D)$ returns the impurity of the set $D$. There are several options to choose
+this function from, the most popular is the Gini index computed as 
+\begin{equation*}
+    H(D) = \sum_{j=1}^n p_j(D)\left(1-p_j(D)\right)
+\end{equation*}
+where
+\begin{equation*}
+    p_j(D) = \frac{1}{|D|}\sum_{(x,y)\in D}I(y = j)
+\end{equation*}
+and $I$ is the indicator function.
+
+The tree is then built recursively and greedily, by assigning to each node the rule $\theta$ that
+minimizes $G(\theta)$, until a maximum depth is reached. In a second phase of the algorithm, the
+tree is pruned by removing nodes to reduce the complexity of the predictor.
+
+To each non-leaf node we can associate an impurity reduction measure defined as 
+\begin{equation*}
+    \Red(\theta) = \frac{|D|}{|\ds|} \left( H(D) - \frac{|D_\text{left}|}{|D|}H(D_\text{left})  -
+    \frac{|D_\text{right}|}{|D|}H(D_\text{right}) \right).
+\end{equation*}
+
+This measure describes how successful each node is in decreasing the impurity in a region. We can
+use this impurity reduction to measure the impact of a feature on the decisions taken by the
+classifier. Given a decision tree $T$ and a feature $j$, its importance $\FI(T, j)$ is the sum of
+the impurity reduction over all inner nodes that split on the feature $j$. More formally if 
+\begin{equation*}
+    \Theta_j = \{(i, t) \in T \ |\ i = j\}
+\end{equation*}
+then 
+\begin{equation*}
+    \FI(T, j) = \sum_{\theta \in \Theta_j} \Red(\theta).
+\end{equation*}
 
 \section{Problem Description}
 
@@ -1107,23 +1214,29 @@ perturbation.
     & \myalign{c}{Corr/Min}
     & \myalign{c}{Corr/Avg} \\
     \hline
-    100 & Yes & No  & No  & 80.1\% & 0.61 & -0.59 & 0.53 \\
-    100 & Yes & Yes & No  & 79.8\% & 0.60 & -0.57 & 0.51 \\
-    100 & Yes & Yes & Yes & 79.8\% & 0.58 & -0.56 & 0.51 \\
-    100 & No  & Yes & No  & 81.6\% & 0.49 & -0.48 & 0.43 \\
-    100 & No  & Yes & Yes & 81.6\% & 0.48 & -0.47 & 0.42 \\
-                                                         \\
-    200 & Yes & No  & No  & 80.1\% & 0.60 & -0.58 & 0.51 \\
-    200 & Yes & Yes & No  & 79.8\% & 0.59 & -0.57 & 0.51 \\
-    200 & Yes & Yes & Yes & 79.9\% & 0.59 & -0.57 & 0.51 \\
-    200 & No  & Yes & No  & 81.7\% & 0.53 & -0.51 & 0.46 \\
-    200 & No  & Yes & Yes & 81.8\% & 0.53 & -0.51 & 0.46 \\
-                                                         \\
-    400 & Yes & No  & No  & 79.9\% & 0.58 & -0.56 & 0.50 \\
-    400 & Yes & Yes & No  & 79.6\% & 0.56 & -0.55 & 0.49 \\
-    400 & Yes & Yes & Yes & 79.5\% & 0.57 & -0.56 & 0.49 \\
-    400 & No  & Yes & No  & 81.6\% & 0.54 & -0.52 & 0.47 \\
-    400 & No  & Yes & Yes & 81.7\% & 0.54 & -0.51 & 0.47 \\
+100 & Yes & No  & No  & 80.2\% & 0.30 & -0.08 & 0.03  \\
+100 & No  & Yes & No  & 81.5\% & 0.23 & -0.04 & 0.04  \\
+100 & No  & Yes & Yes & 81.7\% & 0.23 & -0.06 & 0.04  \\
+100 & Yes & Yes & No  & 79.8\% & 0.27 & -0.11 & 0.02  \\
+100 & Yes & Yes & Yes & 79.8\% & 0.28 & -0.07 & 0.03  \\
+\\
+200 & Yes & No  & No  & 80.1\% & 0.30 & -0.10 & 0.03  \\
+200 & No  & Yes & No  & 81.6\% & 0.27 & -0.06 & 0.04  \\
+200 & No  & Yes & Yes & 81.7\% & 0.26 & -0.06 & 0.04  \\
+200 & Yes & Yes & No  & 79.9\% & 0.28 & -0.09 & 0.01  \\
+200 & Yes & Yes & Yes & 79.9\% & 0.29 & -0.09 & 0.03  \\
+\\
+400 & Yes & No  & No  & 79.5\% & 0.28 & -0.10 & -0.00  \\
+400 & No  & Yes & No  & 81.3\% & 0.27 & -0.10 & 0.02  \\
+400 & No  & Yes & Yes & 81.4\% & 0.29 & -0.07 & 0.03  \\
+400 & Yes & Yes & No  & 79.4\% & 0.27 & -0.13 & 0.00  \\
+400 & Yes & Yes & Yes & 79.4\% & 0.26 & -0.10 & -0.01  \\
+\\
+800 & Yes & No  & No  & 79.5\% & 0.27 & -0.10 & 0.00  \\
+800 & No  & Yes & No  & 81.4\% & 0.28 & -0.09 & 0.02  \\
+800 & No  & Yes & Yes & 81.3\% & 0.28 & -0.08 & 0.03  \\
+800 & Yes & Yes & No  & 79.3\% & 0.27 & -0.14 & 0.01  \\
+800 & Yes & Yes & Yes & 79.3\% & 0.27 & -0.11 & 0.00  \\
     \hline
 \end{tabular}
 \caption{
@@ -1183,9 +1296,211 @@ perturbation.
 
 \section{Conclusions}
 
+We have built a predictor for the diagnoses table of the Mimic-iv dataset. We reached good
+performances while using models that are much simpler than those at the state of the art. Our model
+is also an interesting example of how transformers can be used to process data that is more complex
+than its original use case, a stream of tokens.
+
+We attached our new model to the ontological pipeline presented in \cite{panigutti-xai}, rewriting
+all the code to make a more efficient usage of the available hardware than the original. This
+allowed us to work smoothly with a dataset one order of magnitude larger than the one used in the
+previous version.
+
+We presented a new way to augment a real neighborhood with synthetic data points. The results of our
+experiments show that adding new codes with a method aware of the data distribution is no better
+than adding codes from a uniform distribution under the fidelity metric.
+
+We leveraged the simplicity of our model to extract another kind of explanation from the attention
+weights in the transformer. We showed that those scores agree very weakly with the importances given
+by our post-hoc explanations. This expands a set of very similar results in
+\cite{attention-not-explanation} that indicate that the attention matrices are not good explainers.
+
 \clearpage
 \appendix
-\section{First Appendix}
+\section{More Data}
+
+\deb{Devo capire come impaginare queste mega tabelle...}
+
+\begin{table}[!tb]
+\begin{center}
+\begin{tabular}{  ccccccccc  }
+    \hline
+      \myalign{c}{Neighs}
+    & \myalign{c}{Ont.}
+    & \myalign{c}{Gen.}
+    & \myalign{c}{Uni.}
+    & \myalign{c}{Layer}
+    & \myalign{c}{Fidelity}
+    & \myalign{c}{Corr/Max}
+    & \myalign{c}{Corr/Min}
+    & \myalign{c}{Corr/Avg} \\
+    \hline
+100 & Yes & No  & No  &  0 & 80.2\% & 0.33 & -0.05 & 0.08  \\
+100 & Yes & No  & No  &  1 & 80.2\% & 0.21 & -0.08 & 0.04  \\
+100 & Yes & No  & No  &  2 & 80.2\% & 0.24 & -0.12 & 0.02  \\
+100 & Yes & No  & No  &  3 & 80.2\% & 0.27 & -0.16 & 0.02  \\
+100 & Yes & No  & No  &  4 & 80.2\% & 0.21 & -0.14 & 0.02  \\
+\\
+100 & No  & Yes & No  &  0 & 81.5\% & 0.23 & -0.04 & 0.05  \\
+100 & No  & Yes & No  &  1 & 81.5\% & 0.18 & -0.03 & 0.05  \\
+100 & No  & Yes & No  &  2 & 81.5\% & 0.18 & -0.07 & 0.03  \\
+100 & No  & Yes & No  &  3 & 81.5\% & 0.23 & -0.08 & 0.05  \\
+100 & No  & Yes & No  &  4 & 81.5\% & 0.16 & -0.09 & 0.02  \\
+\\
+100 & No  & Yes & Yes &  0 & 81.7\% & 0.23 & -0.05 & 0.05  \\
+100 & No  & Yes & Yes &  1 & 81.7\% & 0.18 & -0.04 & 0.05  \\
+100 & No  & Yes & Yes &  2 & 81.7\% & 0.18 & -0.09 & 0.02  \\
+100 & No  & Yes & Yes &  3 & 81.7\% & 0.21 & -0.11 & 0.03  \\
+100 & No  & Yes & Yes &  4 & 81.7\% & 0.17 & -0.10 & 0.02  \\
+\\
+100 & Yes & Yes & No  &  0 & 79.8\% & 0.32 & -0.05 & 0.07  \\
+100 & Yes & Yes & No  &  1 & 79.8\% & 0.19 & -0.09 & 0.02  \\
+100 & Yes & Yes & No  &  2 & 79.8\% & 0.21 & -0.13 & 0.01  \\
+100 & Yes & Yes & No  &  3 & 79.8\% & 0.26 & -0.18 & 0.02  \\
+100 & Yes & Yes & No  &  4 & 79.8\% & 0.19 & -0.17 & 0.00  \\
+\\
+100 & Yes & Yes & Yes &  0 & 79.8\% & 0.31 & -0.06 & 0.07  \\
+100 & Yes & Yes & Yes &  1 & 79.8\% & 0.20 & -0.07 & 0.04  \\
+100 & Yes & Yes & Yes &  2 & 79.8\% & 0.21 & -0.11 & 0.02  \\
+100 & Yes & Yes & Yes &  3 & 79.8\% & 0.25 & -0.16 & 0.03  \\
+100 & Yes & Yes & Yes &  4 & 79.8\% & 0.20 & -0.14 & 0.02  \\
+\end{tabular}
+
+\begin{tabular}{  ccccccccc  }
+    \hline
+      \myalign{c}{Neighs}
+    & \myalign{c}{Ont.}
+    & \myalign{c}{Gen.}
+    & \myalign{c}{Uni.}
+    & \myalign{c}{Layer}
+    & \myalign{c}{Fidelity}
+    & \myalign{c}{Corr/Max}
+    & \myalign{c}{Corr/Min}
+    & \myalign{c}{Corr/Avg} \\
+    \hline
+200 & Yes & No  & No  &  0 & 80.1\% & 0.33 & -0.05 & 0.08  \\
+200 & Yes & No  & No  &  1 & 80.1\% & 0.21 & -0.08 & 0.03  \\
+200 & Yes & No  & No  &  2 & 80.1\% & 0.24 & -0.13 & 0.02  \\
+200 & Yes & No  & No  &  3 & 80.1\% & 0.27 & -0.18 & 0.03  \\
+200 & Yes & No  & No  &  4 & 80.1\% & 0.21 & -0.14 & 0.02  \\
+\\
+200 & No  & Yes & No  &  0 & 81.6\% & 0.27 & -0.03 & 0.06  \\
+200 & No  & Yes & No  &  1 & 81.6\% & 0.20 & -0.05 & 0.05  \\
+200 & No  & Yes & No  &  2 & 81.6\% & 0.20 & -0.09 & 0.03  \\
+200 & No  & Yes & No  &  3 & 81.6\% & 0.26 & -0.12 & 0.04  \\
+200 & No  & Yes & No  &  4 & 81.6\% & 0.18 & -0.11 & 0.03  \\
+\\
+200 & No  & Yes & Yes &  0 & 81.7\% & 0.25 & -0.04 & 0.05  \\
+200 & No  & Yes & Yes &  1 & 81.7\% & 0.20 & -0.06 & 0.04  \\
+200 & No  & Yes & Yes &  2 & 81.7\% & 0.19 & -0.08 & 0.03  \\
+200 & No  & Yes & Yes &  3 & 81.7\% & 0.25 & -0.12 & 0.05  \\
+200 & No  & Yes & Yes &  4 & 81.7\% & 0.16 & -0.12 & 0.01  \\
+\\
+200 & Yes & Yes & No  &  0 & 79.9\% & 0.32 & -0.04 & 0.07  \\
+200 & Yes & Yes & No  &  1 & 79.9\% & 0.19 & -0.09 & 0.02  \\
+200 & Yes & Yes & No  &  2 & 79.9\% & 0.21 & -0.13 & 0.01  \\
+200 & Yes & Yes & No  &  3 & 79.9\% & 0.27 & -0.17 & 0.02  \\
+200 & Yes & Yes & No  &  4 & 79.9\% & 0.19 & -0.14 & 0.01  \\
+\\
+200 & Yes & Yes & Yes &  0 & 79.9\% & 0.33 & -0.06 & 0.08  \\
+200 & Yes & Yes & Yes &  1 & 79.9\% & 0.19 & -0.10 & 0.03  \\
+200 & Yes & Yes & Yes &  2 & 79.9\% & 0.22 & -0.14 & 0.01  \\
+200 & Yes & Yes & Yes &  3 & 79.9\% & 0.27 & -0.16 & 0.03  \\
+200 & Yes & Yes & Yes &  4 & 79.9\% & 0.21 & -0.14 & 0.03  \\
+\end{tabular}
+
+\begin{tabular}{  ccccccccc  }
+    \hline
+      \myalign{c}{Neighs}
+    & \myalign{c}{Ont.}
+    & \myalign{c}{Gen.}
+    & \myalign{c}{Uni.}
+    & \myalign{c}{Layer}
+    & \myalign{c}{Fidelity}
+    & \myalign{c}{Corr/Max}
+    & \myalign{c}{Corr/Min}
+    & \myalign{c}{Corr/Avg} \\
+    \hline
+400 & Yes & No  & No  &  0 & 79.5\% & 0.32 & -0.04 & 0.07  \\
+400 & Yes & No  & No  &  1 & 79.5\% & 0.16 & -0.11 & -0.01  \\
+400 & Yes & No  & No  &  2 & 79.5\% & 0.21 & -0.16 & -0.01  \\
+400 & Yes & No  & No  &  3 & 79.5\% & 0.27 & -0.15 & 0.01  \\
+400 & Yes & No  & No  &  4 & 79.5\% & 0.18 & -0.14 & -0.01  \\
+\\
+400 & No  & Yes & No  &  0 & 81.3\% & 0.30 & -0.03 & 0.07  \\
+400 & No  & Yes & No  &  1 & 81.3\% & 0.19 & -0.08 & 0.03  \\
+400 & No  & Yes & No  &  2 & 81.3\% & 0.21 & -0.13 & 0.01  \\
+400 & No  & Yes & No  &  3 & 81.3\% & 0.24 & -0.14 & 0.02  \\
+400 & No  & Yes & No  &  4 & 81.3\% & 0.18 & -0.13 & 0.00  \\
+\\
+400 & No  & Yes & Yes &  0 & 81.4\% & 0.30 & -0.03 & 0.07  \\
+400 & No  & Yes & Yes &  1 & 81.4\% & 0.20 & -0.07 & 0.03  \\
+400 & No  & Yes & Yes &  2 & 81.4\% & 0.21 & -0.11 & 0.01  \\
+400 & No  & Yes & Yes &  3 & 81.4\% & 0.25 & -0.15 & 0.03  \\
+400 & No  & Yes & Yes &  4 & 81.4\% & 0.20 & -0.12 & 0.02  \\
+\\
+400 & Yes & Yes & No  &  0 & 79.4\% & 0.32 & -0.03 & 0.08  \\
+400 & Yes & Yes & No  &  1 & 79.4\% & 0.18 & -0.11 & -0.00  \\
+400 & Yes & Yes & No  &  2 & 79.4\% & 0.20 & -0.16 & -0.02  \\
+400 & Yes & Yes & No  &  3 & 79.4\% & 0.25 & -0.18 & 0.01  \\
+400 & Yes & Yes & No  &  4 & 79.4\% & 0.18 & -0.16 & -0.00  \\
+\\
+400 & Yes & Yes & Yes &  0 & 79.4\% & 0.32 & -0.03 & 0.07  \\
+400 & Yes & Yes & Yes &  1 & 79.4\% & 0.16 & -0.11 & -0.01  \\
+400 & Yes & Yes & Yes &  2 & 79.4\% & 0.20 & -0.15 & -0.02  \\
+400 & Yes & Yes & Yes &  3 & 79.4\% & 0.25 & -0.17 & -0.00  \\
+400 & Yes & Yes & Yes &  4 & 79.4\% & 0.17 & -0.15 & -0.01  \\
+\end{tabular}
+
+\begin{tabular}{  ccccccccc  }
+    \hline
+      \myalign{c}{Neighs}
+    & \myalign{c}{Ont.}
+    & \myalign{c}{Gen.}
+    & \myalign{c}{Uni.}
+    & \myalign{c}{Layer}
+    & \myalign{c}{Fidelity}
+    & \myalign{c}{Corr/Max}
+    & \myalign{c}{Corr/Min}
+    & \myalign{c}{Corr/Avg} \\
+    \hline
+800 & Yes & No  & No  &  0 & 79.5\% & 0.32 & -0.03 & 0.07  \\
+800 & Yes & No  & No  &  1 & 79.5\% & 0.16 & -0.10 & 0.00  \\
+800 & Yes & No  & No  &  2 & 79.5\% & 0.21 & -0.17 & -0.01  \\
+800 & Yes & No  & No  &  3 & 79.5\% & 0.26 & -0.19 & 0.01  \\
+800 & Yes & No  & No  &  4 & 79.5\% & 0.20 & -0.13 & 0.01  \\
+\\
+800 & No  & Yes & No  &  0 & 81.4\% & 0.30 & -0.03 & 0.06  \\
+800 & No  & Yes & No  &  1 & 81.4\% & 0.20 & -0.07 & 0.03  \\
+800 & No  & Yes & No  &  2 & 81.4\% & 0.21 & -0.13 & 0.00  \\
+800 & No  & Yes & No  &  3 & 81.4\% & 0.24 & -0.15 & 0.02  \\
+800 & No  & Yes & No  &  4 & 81.4\% & 0.19 & -0.13 & 0.01  \\
+\\
+800 & No  & Yes & Yes &  0 & 81.3\% & 0.30 & -0.03 & 0.07  \\
+800 & No  & Yes & Yes &  1 & 81.3\% & 0.19 & -0.07 & 0.03  \\
+800 & No  & Yes & Yes &  2 & 81.3\% & 0.20 & -0.13 & 0.00  \\
+800 & No  & Yes & Yes &  3 & 81.3\% & 0.26 & -0.14 & 0.03  \\
+800 & No  & Yes & Yes &  4 & 81.3\% & 0.19 & -0.12 & 0.02  \\
+\\
+800 & Yes & Yes & No  &  0 & 79.3\% & 0.32 & -0.03 & 0.08  \\
+800 & Yes & Yes & No  &  1 & 79.3\% & 0.16 & -0.11 & -0.01  \\
+800 & Yes & Yes & No  &  2 & 79.3\% & 0.19 & -0.18 & -0.02  \\
+800 & Yes & Yes & No  &  3 & 79.3\% & 0.25 & -0.18 & 0.01  \\
+800 & Yes & Yes & No  &  4 & 79.3\% & 0.19 & -0.16 & 0.01  \\
+\\
+800 & Yes & Yes & Yes &  0 & 79.3\% & 0.33 & -0.03 & 0.08  \\
+800 & Yes & Yes & Yes &  1 & 79.3\% & 0.17 & -0.11 & -0.01  \\
+800 & Yes & Yes & Yes &  2 & 79.3\% & 0.20 & -0.16 & -0.02  \\
+800 & Yes & Yes & Yes &  3 & 79.3\% & 0.26 & -0.18 & 0.01  \\
+800 & Yes & Yes & Yes &  4 & 79.3\% & 0.18 & -0.15 & -0.00  \\
+    \hline
+\end{tabular}
+\caption{
+\deb{Layer-wise version of Table \ref{tab:explainer-res}}
+}
+% \label{tab:explainer-res}
+\end{center}
+\end{table}
 
 \newpage
 \clearpage
