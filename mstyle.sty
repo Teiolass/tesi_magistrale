@@ -10,9 +10,10 @@
 \usepackage{graphicx}
 \usepackage{subcaption}
 \usepackage{array}
+\usepackage[font={small}]{caption}
 
-\usepackage[section]{placeins}
-
+% \usepackage[section]{placeins}
+\AddToHook{cmd/section/before}{\clearpage}
 
 \newcommand{\deb}[1]{\textcolor{red}{#1}}
 \newcommand*{\myalign}[2]{\multicolumn{1}{#1}{#2}}

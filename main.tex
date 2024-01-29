@@ -18,6 +18,9 @@
 \maketitle
 \newpage
 
+\tableofcontents
+\newpage
+
 \section{Introduction}
 
 Rapid growth of information systems in the healthcare sector has made large amounts of relevant data
@@ -410,98 +413,26 @@ W_\text{down} (\text{Swish}(W_\text{gate} x) \odot W_\text{up} x) $$ This approa
 to have a better behaviour than a plain MLP layer.
 \end{enumerate}
 
-\subsection{Explainability }
+\subsection{Explainability}
 
-- Carrellata di roba
+New AI based on deep-learning techonologies show outstanding State-of-the-Art performances in many
+fields. However, most of models based on deep-learning, random forests, or SVM are opaque, which
+means that the inner reasoning that brought to the high accuracy results are not easy to extract
+from the prediction.  Those models are then also called black-box models. Thus the last years
+witnessed to an increasing interest in the field of eXplainable Artificial Intelligence (XAI), whose
+objective is to augment the predictions with explanations understandable by humans.
 
-\subsubsection{DoctorXAI} \label{sect-drxai}
+Following the taxonomy of \cite{xai-survey}, we classify the most common XAI techniques as follows:
 
-\deb{Credo che abbia più senso se messa dopo le sezioni in cui descrivo il data-type e
-l'ontologia...}
+\begin{itemize}
+\item Some models are \textit{explainable by design} or intrinsically explainable, which means that
+    their reasoning behind each predictions is transparently available to the user. Examples are
+    decision trees or linear regression models.
 
-DoctorXAI \cite{panigutti-xai} is a tool composed by two distinct parts. A predictor, called
-doctorAI \cite{paper-doctor-ai}, and a novel explanation pipeline. \deb{Un capitolo a parte per
-doctorAI?} For the explanation, given a patient history $p$, a neighborhood $N$ is generated. Then an
-intrisically explainable predictor is trained on $N$. The final explanation is extracted from this
-latter predictor.
-
-\newcommand{\realds}{N_\text{real}}
-
-Let $\ds$ be a dataset of real patients for explanation purposes. Let $d$ be the patient-to-patient
-ontology-aware distance described in section \ref{sect-ontology}. We then extract from $\ds$ the $k$
-patients that are the closest to $p$ according to $d$. This will form the real neighborhood
-$\realds$ of $p$. The natural number $k$ is a parameter of the algorithm.
-
-The following step is to augment $\realds$ with synthetic patients. In order to not introduce too
-much noise into the final dataset $N$, synthetic patients are generated only through deletion from
-real patients. The deletion is performed in an ontology-aware manner, as follows: given a patient
-$p'\in \realds$, each code of its visits has a fixed probability $\theta\in [0,1]$ to be deleted. In
-addition let $D=\{c_1, c_2, \dots, c_r\}$ be the set of such codes chosen for deletion. Let $c'_i$
-be the parent of $c_i$ according to the ontology tree, for each $i=1,2,\dots,r$, and let $C'$ be the
-sets of the $c'_i$ codes. Then the generated synthetic patient $p'$ is equal to $p$ when all the
-codes whose parents appear in $C'$ have been deleted. We notice that for construction all the codes
-in $D$ are deleted. In other words if a code is deleted, all the children of its parent are deleted
-too.
-
-We then need to associate a next visit prediction to each element of the neighborhood. This is done
-by just running the black-box predictor on the data. A note on how the output is extracted should be
-done. In fact the actual output of the black box predictor is a real number between zero and one for
-each code, which defines the probability of that code to appear in the next visit according to the
-predictor. Since these kind of predictors are evaluated with reacall at $k_\text{rec}$ metrics, the
-predicted visit contains the $j$-th code when it is one of the first $k_\text{rec}$ most probable
-codes. \deb{Non ho mai parlato di questa metrica prima.}
-
-Since we are interested in explaing a specific prediction of a visit $v$, which thus contains
-exactly $k_\text{rec}$ codes, we restrict the target labels through the whole dataset $N$ to those
-codes. Therefore the target output has $k_\text{rec}$ dimensions.
-
-We then have a dataset consisting in couples of patient history and prediction. The goal is to fit a
-decision tree classifier on them, but unfortunatly one more step is needed to tackle the fact that
-trees can only work on tabular data while we are dealing with complex data shapes. The proposed
-solution is to encode all the codes in a single vector. Let $p=(v_1, v_2, \dots, v_n)$ be a patient
-to be encoded. Each visit can be encoded in a fixed-size vector through a one hot encoding. If
-$\codes$ is the set of all possible codes, the vector will have $|\codes|$ dimensions. Let
-$\hat{v_i}$ be the codification of the visit $v_i$. Then
-\begin{equation*}
-    (\hat{v_i})_j = \begin{cases}
-        1 &\text{if the $j$-th code appears in $\hat{v_i}$}  \\
-        0 &\text{otherwise}.
-    \end{cases}
-\end{equation*}
-
-Let $\lambda\in [0,1]$ be a fixed discount factor, parameter of the algorithm. In
-\cite{panigutti-xai} a value of $\lambda = 1/2$ is used. Then we can aggregate the vectors
-$\hat{v_i}$ with an exponential decay governed by the $\lambda$ factor. We thus obtain the final
-encoding
-\begin{equation*}
-    \hat{p} = \sum_{i=1}^r \lambda^{r-i+1} v_i.
-\end{equation*}
-
-A tree is then fitted on this data, the inputs being $|\codes|$-dimensional real vectors and the
-outputs being $k_\text{rec}$-dimensional vectors of zeros and ones. The explanation consists in the
-branches taken by the patient to be explained $p$ when classifing it according to the trained tree.
-
-Explanation are evaluated with three metrics:
-\begin{enumerate}
-\item Fidelity to the black box, which describes the perfomances of the tree predictions using the
-black-box as the ground-truth. This metric is evaluated on a held-out set taken from the
-neighborhood $N$. Since this is a multi-label classification task \cite{paper-multi-label}, a $F_1$
-score with micro averaging.
-
-\item A hit score, which measures how often the tree and the black-box models agree on the patient
-to be explained. This is computed as the Hamming-distance between the two outputs.
-
-\item A measure of complexity of the explanation. This is the depth of the leaf in the decision tree
-corresponding to the patient to be explained, and represents the length of the explanation. This is
-important because longer rules may be difficult to interpret by humans \cite{paper-lipton}.
-\end{enumerate}
-
-We can observe that there is a tradeoff to be done between the first two metrics and the third. In
-fact deeper trees can lead to better agreements between the black-box and the explainable
-classifier, but will lead to longer explanations.
-
-\deb{We also notice that there is no metric available to understand how well the synthetic
-neighborhood represents the data distribution...}
+\item \textit{Post-hoc explanations} are those which complement an opaque black-box models, which is
+    the source of the predictions. Examples are the methods that work in tandem with deep-learning
+    models.
+\end{itemize}
 
 \section{Problem Description}
 
@@ -625,6 +556,91 @@ $m^2$ iterations within the DTW algorithm, each of those will require a computat
 visit-to-visit distance, which costs $\Ocompl(n^2)$ iterations. Thus the total cost of the
 algorithm is $\Ocompl(m^2n^2)$.
 
+\subsection{DoctorXAI} \label{sect-drxai}
+
+DoctorXAI \cite{panigutti-xai} is a tool composed by two distinct parts. A predictor, called
+doctorAI \cite{paper-doctor-ai}, and a novel explanation pipeline. \deb{Un capitolo a parte per
+doctorAI?} For the explanation, given a patient history $p$, a neighborhood $N$ is generated. Then an
+intrisically explainable predictor is trained on $N$. The final explanation is extracted from this
+latter predictor.
+
+\newcommand{\realds}{N_\text{real}}
+
+Let $\ds$ be a dataset of real patients for explanation purposes. Let $d$ be the patient-to-patient
+ontology-aware distance described in section \ref{sect-ontology}. We then extract from $\ds$ the $k$
+patients that are the closest to $p$ according to $d$. This will form the real neighborhood
+$\realds$ of $p$. The natural number $k$ is a parameter of the algorithm.
+
+The following step is to augment $\realds$ with synthetic patients. In order to not introduce too
+much noise into the final dataset $N$, synthetic patients are generated only through deletion from
+real patients. The deletion is performed in an ontology-aware manner, as follows: given a patient
+$p'\in \realds$, each code of its visits has a fixed probability $\theta\in [0,1]$ to be deleted. In
+addition let $D=\{c_1, c_2, \dots, c_r\}$ be the set of such codes chosen for deletion. Let $c'_i$
+be the parent of $c_i$ according to the ontology tree, for each $i=1,2,\dots,r$, and let $C'$ be the
+sets of the $c'_i$ codes. Then the generated synthetic patient $p'$ is equal to $p$ when all the
+codes whose parents appear in $C'$ have been deleted. We notice that for construction all the codes
+in $D$ are deleted. In other words if a code is deleted, all the children of its parent are deleted
+too.
+
+We then need to associate a next visit prediction to each element of the neighborhood. This is done
+by just running the black-box predictor on the data. A note on how the output is extracted should be
+done. In fact the actual output of the black box predictor is a real number between zero and one for
+each code, which defines the probability of that code to appear in the next visit according to the
+predictor. Since these kind of predictors are evaluated with reacall at $k_\text{rec}$ metrics, the
+predicted visit contains the $j$-th code when it is one of the first $k_\text{rec}$ most probable
+codes. \deb{Non ho mai parlato di questa metrica prima.}
+
+Since we are interested in explaing a specific prediction of a visit $v$, which thus contains
+exactly $k_\text{rec}$ codes, we restrict the target labels through the whole dataset $N$ to those
+codes. Therefore the target output has $k_\text{rec}$ dimensions.
+
+We then have a dataset consisting in couples of patient history and prediction. The goal is to fit a
+decision tree classifier on them, but unfortunatly one more step is needed to tackle the fact that
+trees can only work on tabular data while we are dealing with complex data shapes. The proposed
+solution is to encode all the codes in a single vector. Let $p=(v_1, v_2, \dots, v_n)$ be a patient
+to be encoded. Each visit can be encoded in a fixed-size vector through a one hot encoding. If
+$\codes$ is the set of all possible codes, the vector will have $|\codes|$ dimensions. Let
+$\hat{v_i}$ be the codification of the visit $v_i$. Then
+\begin{equation*}
+    (\hat{v_i})_j = \begin{cases}
+        1 &\text{if the $j$-th code appears in $\hat{v_i}$}  \\
+        0 &\text{otherwise}.
+    \end{cases}
+\end{equation*}
+
+Let $\lambda\in [0,1]$ be a fixed discount factor, parameter of the algorithm. In
+\cite{panigutti-xai} a value of $\lambda = 1/2$ is used. Then we can aggregate the vectors
+$\hat{v_i}$ with an exponential decay governed by the $\lambda$ factor. We thus obtain the final
+encoding
+\begin{equation*}
+    \hat{p} = \sum_{i=1}^r \lambda^{r-i+1} v_i.
+\end{equation*}
+
+A tree is then fitted on this data, the inputs being $|\codes|$-dimensional real vectors and the
+outputs being $k_\text{rec}$-dimensional vectors of zeros and ones. The explanation consists in the
+branches taken by the patient to be explained $p$ when classifing it according to the trained tree.
+
+Explanation are evaluated with three metrics:
+\begin{enumerate}
+\item Fidelity to the black box, which describes the perfomances of the tree predictions using the
+black-box as the ground-truth. This metric is evaluated on a held-out set taken from the
+neighborhood $N$. Since this is a multi-label classification task \cite{paper-multi-label}, a $F_1$
+score with micro averaging.
+
+\item A hit score, which measures how often the tree and the black-box models agree on the patient
+to be explained. This is computed as the Hamming-distance between the two outputs.
+
+\item A measure of complexity of the explanation. This is the depth of the leaf in the decision tree
+corresponding to the patient to be explained, and represents the length of the explanation. This is
+important because longer rules may be difficult to interpret by humans \cite{paper-lipton}.
+\end{enumerate}
+
+We can observe that there is a tradeoff to be done between the first two metrics and the third. In
+fact deeper trees can lead to better agreements between the black-box and the explainable
+classifier, but will lead to longer explanations.
+
+\deb{We also notice that there is no metric available to understand how well the synthetic
+neighborhood represents the data distribution...}
 \subsection{Solution Proposal}
 
 \section{Implementation of the Solution}
@@ -964,7 +980,7 @@ trainable parameters. Most of the runs gave very similar results in facts.}
     \hline
     Hidden size               & 63, \textbf{128}, 256        \\
     Number of layers          & 1, \textbf{5}, 10            \\
-    Number of attention heads & \textbf{3}, 8                \\
+    Number of attention heads & \textbf{4}, 8                \\
     Attention head size       & 15, \textbf{32}, 64          \\
     Learning rate             & $\mathbf{9^{-3}}$, $10^{-4}$ \\
     Intermediate size of MLPs & 255, 512, \textbf{1024}      \\
@@ -980,25 +996,49 @@ bold-face.}
 We trained the final model until the loss on the evaluation set stopped improving. The history of
 the loss over the evaluation set is showed in Figure \ref{fig:kelso-train-loss}. We also kept track
 of the recall metrics over the first 5, 10, 20 and 30 codes. The history of these metrics is showed
-in Figure \ref{fig:kelso-train-recall}.
+in Figure \ref{fig:kelso-train-recall}. The results show that our model performs better than the
+version of doctorAI used in \cite{panigutti-xai}, but it still does not reach the performances of
+more complex models as SETOR \cite{setor-paper}, which also uses the ontology for the predictions.
+However one of the strengths of our model is its semplicity, which will allow us to perform the
+analysis described in the next sections. Table \ref{tab:predictor-compare} compares the performances
+of these three different models.
 
-\begin{figure}[h] 
+\begin{figure}[!tb] 
 \makebox[\textwidth][c]{\includegraphics{kelso-train-loss.pdf}}
 \caption{Loss history during the training of the predictor model.} 
 \label{fig:kelso-train-loss} 
 \end{figure}
 
-\begin{figure}[!h] 
+\begin{figure}[!tb] 
 \makebox[\textwidth][c]{\includegraphics{kelso-train-recall.pdf}}
 \caption{Recalls history during the training of the predictor model.}
 \label{fig:kelso-train-recall} 
 \end{figure}
 
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{  lccc  }
+    \hline
+    \myalign{c}{Model} & \myalign{c}{Recall@10} & \myalign{c}{Recall@20} & \myalign{c}{Recall@30} \\ 
+    \hline
+    doctorAI  & 35.0\% & 52.1\% & 63.1\% \\
+    Our model & 50.8\% & 65.3\% & 73.7\% \\
+    SETOR     & 70.6\% & 84.1\% & 88.2\% \\
+    \hline
+\end{tabular}
+\caption{
+    Comparison of the perfomances of different models.
+}
+\label{tab:predictor-compare}
+\end{center}
+\end{table}
+
+
 We tried also training the model over a portion of the training set, while keeping the evaluation
 and tests set at their original sizes. Figure \ref{fig:kelso-partial-train} shows the evaluation
 loss and recall metrics as a function of the size of the training set.
 
-\begin{figure}[h] 
+\begin{figure}[!tb] 
 \makebox[\textwidth][c]{\includegraphics{kelso-partial-train.pdf}}
 \caption{Metrics on the test set for the model trained on partial data. The percentage on the x-axis
 indicates the portion of the train set used. \deb{Titoli etc..}}
@@ -1007,7 +1047,54 @@ indicates the portion of the train set used. \deb{Titoli etc..}}
 
 \subsection{Explanation Pipeline}
 
-\begin{table}[h]
+We run the experiments on the explanation pipeline. Using the same hyperparameters of the predictor
+model, we train a generator model on the train set. We set the number of possible output codes
+$k_\text{out}$ to 500. The codes to be replace with \c{hole} are chosen independently with
+probability $p_\text{hole}$. We tried values of $p_\text{hole}$ to $0.15$ and $0.25$, obtaining
+similar results.
+
+We generated the synthetic neighborhoods from the real neighborhoods in five distinct ways. The
+first is the ontological perturbation described in \cite{panigutti-xai}. Then we used the generative
+perturbations with two different methods, one guided by the generative model, and one with the new
+codes sampled uniformely. Finally we used a combination of the two, running the generative
+perturbation on top of the perturbations generated by the ontological pipeline.
+
+Across the various combinations we kept the size of the synthetic neighborhood fixed at 32,000
+patients. In the case of a single type of perturbation (ontological or generative) we generated
+$n_\text{single}$ artificial patient from each real one. In the case in which we used both types of
+perturbations, we generated $n_\text{ont}$ synthetic patients from each real one, and then
+$n_\text{gen}$ patients from each on of the previously generated. Table
+\ref{tab:multiplications-neigh} shows the multiplication factors we used for each size of the real
+neighborhood. We notice that in some cases in the mixed generative method there are some unbalances
+between $n_\text{ont}$ and $n_\text{gen}$, where we always favored the generative part giving it
+more weight in the perturbation. We'll show however that despite this unbalance the results for the
+mixed generation methods are more similar to the ones obtained from the purely ontological
+perturbation.
+
+\begin{table}[!h]
+\begin{center}
+\begin{tabular}{ cccc }
+    \hline
+      \myalign{c}{Real neighborhood size}
+    & \myalign{c}{$n_\text{single}$}
+    & \myalign{c}{$n_\text{ont}$}
+    & \myalign{c}{$n_\text{gen}$} \\
+    \hline
+    100 & 32 & 4 & 8 \\
+    200 & 16 & 4 & 4 \\
+    400 &  8 & 2 & 4 \\
+    800 &  4 & 2 & 2 \\
+    \hline
+\end{tabular}
+\caption{
+    Number of synthetic patients generated from each original real patient.
+}
+\label{tab:multiplications-neigh}
+\end{center}
+\end{table}
+
+
+\begin{table}[!tb]
 \begin{center}
 \begin{tabular}{  cccccccc  }
     \hline
@@ -1047,15 +1134,14 @@ indicates the portion of the train set used. \deb{Titoli etc..}}
     (value is Yes). The fidelity reports the fidelity of the tree model using the black-box
     predictor as ground-truth. The three \textit{Corr} fields show the correlation beetween the
     importances in the explanation and an aggregation of the attention in the transformer over all
-    layers. The three aggregations are the maximum (\textit{Max}), the minimum (\textit{Min}), and
-    the average (\textit{Avg}).
+    layers and all codes. The three aggregations are the maximum (\textit{Max}), the minimum
+    (\textit{Min}), and the average (\textit{Avg}).
 }
-\label{tab:explainer-res}
+\label{tab:explainer-res-all}
 \end{center}
 \end{table}
-\subsection{Analysis}
 
-\begin{table}[h]
+\begin{table}[!tb]
 \begin{center}
 \begin{tabular}{  cccccccc  }
     \hline
@@ -1068,36 +1154,43 @@ indicates the portion of the train set used. \deb{Titoli etc..}}
     & \myalign{c}{Corr/Min}
     & \myalign{c}{Corr/Avg} \\
     \hline
-100 & Yes & No  & No  & 80.1\% & 0.29 & -0.1 & 0.03  \\
+100 & Yes & No  & No  & 80.1\% & 0.29 & -0.10 & 0.03  \\
 100 & No  & Yes & No  & 81.7\% & 0.25 & -0.05 & 0.05  \\
 100 & No  & Yes & Yes & 81.6\% & 0.22 & -0.06 & 0.03  \\
 100 & Yes & Yes & No  & 79.9\% & 0.28 & -0.09 & 0.03  \\
 100 & Yes & Yes & Yes & 79.8\% & 0.29 & -0.08 & 0.03  \\
-\\
-200 & Yes & No  & No  & 80.0\% & 0.3 & -0.11 & 0.03  \\
+                                                      \\
+200 & Yes & No  & No  & 80.0\% & 0.30 & -0.11 & 0.03  \\
 200 & No  & Yes & No  & 81.7\% & 0.27 & -0.07 & 0.04  \\
 200 & No  & Yes & Yes & 81.8\% & 0.25 & -0.07 & 0.04  \\
-200 & Yes & Yes & No  & 79.8\% & 0.28 & -0.1 & 0.02  \\
-200 & Yes & Yes & Yes & 79.9\% & 0.3 & -0.08 & 0.03  \\
-\\
+200 & Yes & Yes & No  & 79.8\% & 0.28 & -0.10 & 0.02  \\
+200 & Yes & Yes & Yes & 79.9\% & 0.30 & -0.08 & 0.03  \\
+                                                      \\
 800 & Yes & No  & No  & 79.8\% & 0.28 & -0.11 & 0.03  \\
 800 & No  & Yes & No  & 81.3\% & 0.27 & -0.07 & 0.02  \\
 800 & No  & Yes & Yes & 81.3\% & 0.27 & -0.07 & 0.03  \\
-800 & Yes & Yes & No  & 79.4\% & 0.27 & -0.12 & 0.0  \\
-800 & Yes & Yes & Yes & 79.3\% & 0.27 & -0.12 & 0.0  \\
+800 & Yes & Yes & No  & 79.4\% & 0.27 & -0.12 & 0.00  \\
+800 & Yes & Yes & Yes & 79.3\% & 0.27 & -0.12 & 0.00  \\
     \hline
 \end{tabular}
 \caption{
-    Same thing as above, filtered on input codes
+    This table shows the same kind of data of Table \ref{tab:explainer-res-all} where the
+    correlations are computed only over the codes present in the original patient to explain.
 }
 \label{tab:explainer-res}
 \end{center}
 \end{table}
-\subsection{Analysis}
 
 \section{Conclusions}
 
+\clearpage
+\appendix
+\section{First Appendix}
 
+\newpage
+\clearpage
+\phantomsection
+\addcontentsline{toc}{section}{Bibliography}
 \bibliography{refs}
 \bibliographystyle{plain} % We choose the "plain" reference style
 \end{document}
