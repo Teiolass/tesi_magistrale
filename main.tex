@@ -98,7 +98,7 @@ until a special \c{<end>} token is generated, or the generated sequence length e
 
 A recurrent model is built in such a way that it can take in input a hidden memory vector $h$, and a
 token $t$, and then outputs $h'$, an updated version of $h$. The new hidden vector is then fed to
-the model together with the next token.
+the model together with the next token \cite{gated-networks}.
 
 The process is started with a fixed initial vector $h_0$, and let's assume the prompt is made by the
 token sequence $t_0, \dots, t_n$. Then given the recurrent model $f$, the first hidden vector
@@ -107,8 +107,8 @@ This tackles the first part of the problem.
 
 A very simple form for the model $f$ is the following. Let $e_1, \dots, e_N$ be a sequence of fixed
 $k$-dimensional vectors (these are called embeddings), where $N$ is the number of possible tokens
-and $k$ is a fixed integer. Let $sigma$ be a non linear activation function, typical choices are the
-Rectified Linear Unit (ReLU) or the sigmoid function. Let $W_h$ and $W_t$ be two $n \times n$
+and $k$ is a fixed integer. Let $\sigma$ be a non linear activation function, typical choices are
+the Rectified Linear Unit (ReLU) or the sigmoid function. Let $W_h$ and $W_t$ be two $n \times n$
 matrices a $b$ a $k$-dimensional vector. Then if $h$ is a $k$-dimensional hidden state, and $t$ a
 token corresponding to the vector $e_j$, we set $f(h,t) = \sigma(W_h h + W_t e_j + b)$.
 
@@ -122,7 +122,8 @@ tokens. We can then extract a new token from this distribution. Usual approaches
 the maximum probability token, a plain sampling over the distribution, or some hybrid methods in
 which the sample is performed only on the most probable tokens. The result of this process is a new
 token $g_1$. From this point onward we repeat the process, generating $\hat{h}_2 = f(\hat{h}_1, g_1)$
-and from the new hidden state a new token, and so on.
+and from the new hidden state a new token, and so on. An example of this architecture is showed in
+Figure \ref{fig:recurrent-arch-1}.
 
 The training of this kind of models is performed noticing that it defines a probability distribution
 over all the possible answer sentences. In fact each new token is generated from a probability
@@ -130,64 +131,32 @@ distribution given the previous ones. This is effectively a decomposition of the
 whole sentence. Thus the training is performed maximizing the likelihood of a dataset of human
 generated pairs of input and outputs.
 
-\begin{figure}[!h] 
+\begin{figure}[!tb] 
 \begin{center}
 \includegraphics{recurrent_simple.pdf}
-\caption{\deb{Recurrent architecture, simple.}} 
-% \label{fig:your image label} 
-\end{center}
-\end{figure}
-
-\begin{figure}[!h] 
-\begin{center}
-\includegraphics{recurrent_context.pdf}
-\caption{\deb{Recurrent architecture, with context.}} 
-% \label{fig:your image label} 
-\end{center}
-\end{figure}
-
-\begin{figure}[!h] 
-\begin{center}
-\includegraphics{context_with_attention.pdf}
-\caption{\deb{This is how we compute the context with attention}} 
-% \label{fig:your image label} 
-\end{center}
-\end{figure}
-
-\begin{figure}[!h] 
-\begin{center}
-\includegraphics{self_attention_architecture.pdf}
-\caption{\deb{This is the architecture of a self attention head. This structure is repeated for every index $j$}} 
-% \label{fig:your image label} 
-\end{center}
-\end{figure}
-
-\begin{figure}[!h] 
-\begin{center}
-\includegraphics{transformer_architecture.pdf}
-\caption{\deb{This is the architecture of a simple LLM.}} 
-% \label{fig:your image label} 
+\caption{Example of a simple RNN architecture.} 
+\label{fig:recurrent-arch-1} 
 \end{center}
 \end{figure}
 
 As in most of trainings of Neural Networks, the optimization is done through Stochastic Gradient
 Descent and backpropagation. This reveals the biggest weakness of recurrent architectures. Assuming
-the model has parsed $n$ tokens between inputs and outputs, which means that reasonable values for
-$n$ could range from a few dozens to few hundreds or even more, the gradient for the first
-application of $f$ has to go through all the $n$ layers that follows to arrive to the loss. During
+the model has dealt with $n$ tokens between inputs and outputs, which means that reasonable values
+for $n$ could range from a few dozens to few hundreds or even more, the gradient for the first
+application of $f$ has to go through all the $n$ layers that follow to arrive to the loss. During
 all these steps the quality of the gradient is degraded, usually leading to the phenomenons of
-exploding gradients or vanishing gradients. The idea is that the flow of the gradient is a dynamical
-system which can be mostly described by a multiplication by a a matrix. If these matrices
-consistently increase the magnitude of the gradient, the gradient will become very large, and thus a
-step of SGD will move the model parameters in a region in which the function cannot be approximated
-by the gradient in the starting point. This means that the update is meaningless. If instead the
-matrices consistently decrease the magnitude of the gradient, the update of the SGD will be near
-zero, and the model will fail to converge.
+exploding gradients or vanishing gradients \cite{difficult-rnn}. The idea is that the flow of the
+gradient is a dynamical system which can be mostly described by a multiplication by a a matrix. If
+these matrices consistently increase the magnitude of the gradient, the gradient will become very
+large, and thus a step of SGD will move the model parameters in a region in which the function is
+not approximated by the gradient in the starting point. This means that the update is meaningless.
+If instead the matrices consistently decrease the magnitude of the gradient, the update of the SGD
+will be near zero, and the model will fail to converge.
 
 Several attempts to solve this problem have been tried by modifying the inner architecture of the
 recurrent net, and the most notable examples of that are the Gate Recurrent Units (GRUs) and the
-Long Short Term Memory models (LSTMs). These are however only a mitigation of the problem, and not a
-complete solution.
+Long Short Term Memory models (LSTMs) \cite{gated-networks}. These are however only a mitigation of
+the problem, and not a complete solution.
 
 One first possible modification, that does not solve the gradient problem but still improves the
 performances of the model is using two different models for the two parts of the task. These two
@@ -203,7 +172,16 @@ remembering at which point of the output generation the model is at. This sugges
 functions could be carried out by two different vectors. This can be easily accomplished by having
 the decoder model be a function of a decoder hidden state, a context vector, which is the final
 output of the encoder, and the previous token. The result is that the decoder is unable to forget
-the encoder output, because it is not modified during the recurrence.
+the encoder output, because it is not modified during the recurrence. An example of this kind of
+architecture is showed in figure \ref{fig:recurrent-context}.
+
+\begin{figure}[!tb] 
+\begin{center}
+\includegraphics{recurrent_context.pdf}
+\caption{An example of a recurrent architecture with a context vector.}
+\label{fig:recurrent-context} 
+\end{center}
+\end{figure}
 
 The next step has been improving this mechanism. In the translation task, it's very common for a
 word in the output to map directly to a single word in the input, and more generally small groups of
@@ -211,7 +189,16 @@ words in the outputs correspond to small groups of words in the input. On the ot
 data produced by the encoder, the hidden states, is discarded, keeping only the last hidden state.
 As a consequence an arbitrary large amount of data, the input tokens, has to be compressed in a
 single hidden state, whose size is fixed by the model architecture. The following idea improves over
-this direction.
+this direction \cite{attention-translation}. Figure \ref{fig:attention-simple} shows the structure
+we are going to present.
+
+\begin{figure}[!tb] 
+\begin{center}
+\includegraphics{context_with_attention.pdf}
+\caption{Structure of a computation of the context vector in a recurrent architecture.} 
+\label{fig:attention-simple} 
+\end{center}
+\end{figure}
 
 Let's assume that the encoder has generated the hidden states $h_0, \dots, h_n$, and let $\hat{h}$ be
 the current hidden state in the decoder. In the previous architecture we would need a fixed context
@@ -240,14 +227,15 @@ layer, the hidden state of the previous layer, and sometimes the context vector.
 \subsubsection{Transformers}
 
 The next iteration on these design led to the current State of the Art models like GPT-3.5 or Llama.
-The idea is to get rid entirely of the recurrent part, focusing only on the attention. The heart of
-these models is the transformer. It is a layer that takes as an input a set of $d$-dimensional
-vectors $e_1,..., e_n$ and returns a set of vectors of the same size. By means of a multiplication
-by some fixed matrices $W_k$, $W_q$ and $W_v$ of size $d\times d_h$ where $d_h$ is called hidden
-size, the vectors $e_i$ are mapped to three sets of vectors: keys $K_i = W_k e_i$, queries $Q_i =
-W_q e_i$ and values $V_i = W_v e_i$. The keys perform the same role of the hidden states $h_i$ when
-choosing the importances in the previous discussion. The queries are the anologous of the vector
-$\hat{h}$, while the values are the vectors that will be combined through a weighted average.
+The idea is to get rid entirely of the recurrent part, focusing only on the attention
+\cite{attention-all-need}. The heart of these models is the transformer. It is a layer that takes as
+an input a set of $d$-dimensional vectors $e_1,..., e_n$ and returns a set of vectors of the same
+size. By means of a multiplication by some fixed matrices $W_k$, $W_q$ and $W_v$ of size $d\times
+d_h$ where $d_h$ is called hidden size, the vectors $e_i$ are mapped to three sets of vectors: keys
+$K_i = W_k e_i$, queries $Q_i = W_q e_i$ and values $V_i = W_v e_i$. The keys perform the same role
+of the hidden states $h_i$ when choosing the importances in the previous discussion. The queries are
+the anologous of the vector $\hat{h}$, while the values are the vectors that will be combined
+through a weighted average.
 
 For each query vector, a measure of importance is computed as before as the dot product with each
 key value. This result is often scaled by the square root of the number of dimensions $d_h$, which
@@ -267,7 +255,16 @@ O = \text{SoftMax} (Q K^\top/\sqrt{d_h})V
 \end{equation}
 
 Since the keys, queries and values are obtained from the same set of vectors $e_i$, the expression
-\ref{attn-ref} is called self-attention head.
+\ref{attn-ref} is called self-attention head. Figure \ref{fig:attention-head} shows the described
+architecture.
+
+\begin{figure}[!tb] 
+\begin{center}
+\includegraphics{self_attention_architecture.pdf}
+\caption{The architecture of a self attention head. This structure is repeated for every index $j$.} 
+\label{fig:attention-head} 
+\end{center}
+\end{figure}
 
 Usually more than a single self-attention head is present in a transformer layer. In an
 $m$-headed transformer there are $m$ triples of matrices $W_k^{(i)}$, $W_q^{(i)}$ and $W_v^{(i)}$,
@@ -341,7 +338,16 @@ gradient. It may be more perfomant to deal with the minibatch in a single pass. 
 concatenating all the data for the minibatch in a new dimension of the matrices, and the model
 doesn't change much to accommodate this modification. However in general the sequence length will not
 be constant through the minibatch. Thus all the sequences are padded to the max length within the
-minibatch, and the attention mask is tweaked to avoid that any output depends on a padding token.
+minibatch, and the attention mask is tweaked to avoid that any output depends on a padding token. A
+tipical transformer architecture is showed in Figure \ref{fig:transformer-architecture}.
+
+\begin{figure}[!tb] 
+\begin{center}
+\includegraphics{transformer_architecture.pdf}
+\caption{Example of a typical transformer architecture.} 
+\label{fig:transformer-architecture} 
+\end{center}
+\end{figure}
 
 All of this tweaks allows the model to grow in size while still being trainable. In the last year in
 fact there have been proposed several of such models, varying in size between a few billions
@@ -370,7 +376,7 @@ token embedding  multiplied by the matrix $W_k$ or $W_q$. Let's assume that the 
 to be an even number $d$, which is reasonable since for performance reasons typical values of
 dimensions are large powers of two or some of their multiples. Then a good choice could be
 $$ f_{\{q, k}\}(y_n, n) = R_{\Theta, n} y_m $$
-where $R_(Theta, n)$ is a matrix in the following form:
+where $R_{\Theta, n}$ is a matrix in the following form:
 $$
     R_{\Theta, n} = \begin{pmatrix} 
       R(n \theta_1)& 0& \dots& 0 \\
