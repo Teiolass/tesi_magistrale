@@ -356,10 +356,11 @@ Examples are the GPT family developed by OpenAI, and the Llama family, developed
 
 \subsubsection{The Llama-2 Models}
 
-The Llama-2 are a family of LLMs sharing the same underlying architecture and available in different
-sizes: 7B, 13B, 34B and 70B, where the number counts the number of trainable parameters of the
-model. The architecture is the same transformer-based decoder described in the previous section,
-with the following modifications.
+The Llama-2 \cite{llama}, \cite{llama-2} are a family of LLMs sharing the same underlying
+architecture and available in different sizes: 7B, 13B, 34B and 70B, where the number counts the
+number of trainable parameters of the model. The architecture is the same transformer-based decoder
+described in the previous section, with the following modifications:
+
 \begin{enumerate}
 \item The normalization layers, used to prevent internal covariate shifts, are substituted with Root
 Mean Square layer normalizations (RMSNorm) \cite{paper-rmsnorm}. The usual normalization layers
@@ -566,7 +567,6 @@ $$ \mu(p) = \mu_0(v_1) \mu_\text{next} (v_2 | (v_1)) \mu_\text{next} (v_3 |
 where $\mu_0$ is a probability distribution over the initial visits $\visits$, and $\mu_\text{next}$ is a
 probability distribution over the next visit given the preceding ones. In other words $\mu_\text{next} (v
 | p')$ is the probability of $v$ being the next observed visit after seeing all the visits in $p'$.
-\deb{Probabilmente ci dovrebbe essere una 'visita terminale' per dire quando la sequnza finisce.}
 
 A predictor model $h(\cdot, \theta)$ parameterized by a vector of parameters $\theta \in \R^d$, for some
 number of dimensions $d$, is a function
@@ -669,10 +669,9 @@ algorithm is $\Ocompl(m^2n^2)$.
 \subsection{DoctorXAI} \label{sect-drxai}
 
 DoctorXAI \cite{panigutti-xai} is a tool composed by two distinct parts. A predictor, called
-doctorAI \cite{paper-doctor-ai}, and a novel explanation pipeline. \deb{Un capitolo a parte per
-doctorAI?} For the explanation, given a patient history $p$, a neighborhood $N$ is generated. Then an
-intrisically explainable predictor is trained on $N$. The final explanation is extracted from this
-latter predictor.
+doctorAI \cite{paper-doctor-ai}, and a novel explanation pipeline. For the explanation, given a
+patient history $p$, a neighborhood $N$ is generated. Then an intrisically explainable predictor is
+trained on $N$. The final explanation is extracted from this latter predictor.
 
 \newcommand{\realds}{N_\text{real}}
 
@@ -698,7 +697,7 @@ done. In fact the actual output of the black box predictor is a real number betw
 each code, which defines the probability of that code to appear in the next visit according to the
 predictor. Since these kind of predictors are evaluated with reacall at $k_\text{rec}$ metrics, the
 predicted visit contains the $j$-th code when it is one of the first $k_\text{rec}$ most probable
-codes. \deb{Non ho mai parlato di questa metrica prima.}
+codes. 
 
 Since we are interested in explaing a specific prediction of a visit $v$, which thus contains
 exactly $k_\text{rec}$ codes, we restrict the target labels through the whole dataset $N$ to those
@@ -757,9 +756,9 @@ neighborhood represents the data distribution...}
 
 \subsection{Black-Box Model} \label{sect-kelso}
 
-We build a new black-box model based on transformer architecture modyfing the Llama LLM \deb{cito il
-mio capitolo o il paper?}. We observe that the shape of the data of a LLM is simpler than the one we
-are dealing with. In fact text is defined in this context as a pure sequence of tokens, while our
+We build a new black-box model based on transformer architecture modyfing the Llama LLM
+\cite{llama}, \cite{llama-2}. We observe that the shape of the data of a LLM is simpler than the one
+we are dealing with. In fact text is defined in this context as a pure sequence of tokens, while our
 medical data is a sequence of sets of labels, as described in section \ref{sect-datashape}. The
 structure of our model is showed in Figure \ref{fig:kelso-architecture}.
 
