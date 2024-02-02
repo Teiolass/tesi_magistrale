@@ -1029,7 +1029,18 @@ In the diagnoses table of the Mimic-iv dataset there are 2,766,877 ICD-9 codes (
 and 1,989,449 codes (42\% of the total). Considering codes with different versions of ICD
 categorization as different, the dataset contains 25,829 distinct codes, which means that each code
 appears on average 184 times in the database. Of course the codes are not evenly distributed among
-those present. \deb{Grafico della distribuzione}.
+those present. Distribution of the number of codes is shown in Figure \ref{fig:icd-dist}.
+
+\begin{figure}[!tb] 
+\makebox[\textwidth][c]{\includegraphics{icd_dist.pdf}}
+\caption{
+    Distribution of the ICD codes. The x axis represents the number of occurences of a given code
+    within the dataset, the y axis counts how many codes have the corresponding count. Only codes
+    with less than 5,000 occurences are shown. There are 146 codes with more than 5,000 occurences,
+    which is 1.6\% of the total number of distinct codes.
+} 
+\label{fig:icd-dist} 
+\end{figure}
 
 
 The admission table contains 180,733 distinct patients. However there are 101,198 patients (56\% of
@@ -1048,8 +1059,21 @@ does not contain all the ICD-10 codes present in Mimic-iv. These are the 0.8\% o
 are assigned to a special ``not found'' class. When multiple conversions were available we chose a
 random one, as done in \cite{setor-paper}.
 
-We convert the ICD codes to another system called CCS. \deb{qui non trovo il paper, e in effetti
-tutti i paper che lo usano linkano solo al sito web...}
+We also convert the ICD codes to another system called CCS (Clinical Classification Software).
+\deb{qui non trovo il paper, e in effetti tutti i paper che lo usano linkano solo al sito web...} 
+It is a coarser classification than ICD which has proven useful for analysis due to the lower number
+of codes. There are 281 distinct CCS codes within the dataset. Their distribution is shown in Figure
+\ref{fig:ccs-dist}.
+
+\begin{figure}[!tb] 
+\makebox[\textwidth][c]{\includegraphics{ccs_dist.pdf}}
+\caption{
+    Distribution of the CCS codes. The x axis represents the number of occurences of a given code
+    within the dataset, the y axis counts how many codes have the corresponding count.
+} 
+\label{fig:ccs-dist} 
+\end{figure}
+
 
 \subsection{Black-Box Model}
 
