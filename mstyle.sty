@@ -32,6 +32,7 @@
 \renewcommand{\P}{\Pi}
 \newcommand{\N}{\mathbb{N}}
 \newcommand{\R}{\mathbb{R}}
+\newcommand{\Q}{\mathbb{Q}}
 \newcommand{\Ocompl}{\mathcal{O}}
 \newcommand{\arr}{\longrightarrow}
 \newcommand{\numer}[1]{\overline{#1}}
@@ -48,3 +49,10 @@
 \newcommand{\conv}{\rightsquigarrow}
 \newcommand{\sub}[2]{[#1/#2]}
 \newcommand{\red}[1]{\text{RED}_{#1}}
+
+\newcounter{basicblock}
+\renewcommand{\thebasicblock}{\arabic{basicblock}}
+% \renewcommand{\thebasicblock}{\arabic{basicblock}}
+\newenvironment{block}[1][]
+{\refstepcounter{basicblock}\par\medskip\noindent\textbf{#1~\thebasicblock}\quad}
+{\medskip}

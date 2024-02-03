@@ -224,7 +224,7 @@ before: it takes as an input the previous hidden state, the embedding of a token
 a context vector. Each of the subsequent layers takes in input the previous hidden state for that
 layer, the hidden state of the previous layer, and sometimes the context vector.
 
-\subsubsection{Transformers}
+\subsubsection{Transformers} \label{sec:transformers}
 
 The next iteration on these design led to the current State of the Art models like GPT-3.5 or Llama.
 The idea is to get rid entirely of the recurrent part, focusing only on the attention
@@ -354,6 +354,95 @@ fact there have been proposed several of such models, varying in size between a 
 parameters to hundred of billions of parameters. These are called Large Language Models, or LLMs.
 Examples are the GPT family developed by OpenAI, and the Llama family, developed by Meta.
 
+\subsubsection{Universality of Transformers}
+
+Despite their semplicity, transformers have shown to be a very powerful component in modeling
+sequential data. In this section we present some results that justify their expressiveness. We start
+by investigating wich class of functions transformers can describe, following the approach of
+\cite{transformer-approx}.
+
+We define a function from $\R^{d\times n}$ to itself to be a $(h, m, r)$-transformer if it can be
+described by a transformer layer with $h$ heads of size $m$ with a MLP that has hidden size $r$. We
+assume the transformer to have skip connections, but not layer normalization stages. We then define
+the set of transformer networks as
+\begin{equation*}
+    \mathcal{T}^{h, m, r} = \{ g\colon \R^{d\times n} \to \R^{d\times n} \ |\ \text{$g$ is a
+    composition of $(h,m,r)$-transformers} \}.
+\end{equation*}
+
+As we noted in a previous section, transfomers without positional encodings have no informations on
+the order of the input vectors. Therefore the functions described by transformer networks must have
+this property as well. We then define a function $f\colon\R^{d\times n} \to \R^{d\times n}$ to be
+permutation invariant if for every permutation matrix $P\in \R^{n\times n}$ and every input
+$X\in\R{d\times n}$, $f$ satisfies $f(XP) = f(X)P$. Moreover the transfomer network functions are
+composition of continous function, and hence continous themselves.
+
+Let $\mathcal{F}_\text{PE}$ be the set of functions from $\R^{d\times n}$ to itself that are
+continous, with compact support, and that have the permutation equivariant property. Then the
+following theorem states that transformer network functions are good approximators of functions in
+$\mathcal{F}_\text{PE}$ \cite{transformer-approx}.
+
+\begin{block}[Theorem]
+    For every $f\in\mathcal{F}_\text{PE}$, $\epsilon > 0$ and $1 \leq p < \infty$, there exists a
+    transformer network function $g\in \mathcal{T}^{2,1,4}$ such that $\|f - g\|_p < \epsilon$,
+    where $\|\cdot\|_p$ is the $p$-norm.
+\end{block}
+
+We can present a similar result for transformer networks with positional encodings. Let us define
+their set as 
+\begin{equation*}
+    \mathcal{T}^{h, m, r}_P = \{ g \ |\ \text{
+        $g(X)=f(X + E)$ for some $f\in\mathcal{T}^{h,m,r}$, $E\in\R^{d\times n}$, for all $X$
+    }\}
+\end{equation*}
+
+Let then $\mathcal{F}_\text{CD}$ be the set of continous functions from $\R^{d \times n}$ to itself
+with compact domain. In other words $\mathcal{F}_\text{PE}$ are the functions in
+$\mathcal{F}_\text{CD}$ that satisfy the permutation equivariant property. The the following theorem
+holds \cite{transformer-approx}:
+
+\begin{block}[Theorem]
+    For every $f\in\mathcal{F}_\text{CD}$, $\epsilon > 0$ and $1 \leq p < \infty$, there exists a
+    transformer network with positional encodings $g\in \mathcal{T}^{2,1,4}_P$ such that 
+    ${{\|f - g\|_p < \epsilon}}$, where $\|\cdot\|_p$ is the $p$-norm.
+\end{block}
+
+We can also observe an interesting expressiveness of transformer networks under the lens of accepted
+languages, following the work presented in \cite{transformer-turing}. We restrict ourselves in
+working with rational numbers. We define then a seq-to-seq network as a function that take in input
+a sequence of vectors $X=(x_1, x_2, \dots, x_n)$, where $x_i\in\Q^d$, a seed vector $s\in\Q^d$, a
+natural number $r$ and outputs a sequence of $r$ vectors $Y=(y_1, y_2, \dots, y_r)$, where
+$y_i\in\Q^d$.
+
+We can see that the transformer we defined in Section \ref{sec:transformers} is not a seq-to-seq
+network because the SoftMax function is not a rational function. In the following discussion we will
+thus substitute it with the HardMax function, wich is the indicator function of the argmax of its
+arguments. The two functions are similar, in a sense that they distribute the attention with a
+distribution of proabability over the value vectors. The output of the seq-to-seq transformer is
+generated in an autoregressive manner.
+
+We define a language recognizer as a tuple $(\Sigma, f, N, s, F)$, where $\Sigma$ is a finite
+alphabet, $f\colon\Sigma\to\Q^d$ is an embedding function, $N$ is a seq-to-seq network, $s\in\Q^d$
+is a seed vector, and $F\subseteq\Q^d$ is a set of final vectors. We say that $N$ accept a string of
+charcters $w\in\Sigma^*$ if exists a natural number $r$ such that ${{N(f(w), s, r) = (y_1, y_2, \dots,
+y_r)}}$ and $y_r\in F$. To make sure that all the relevant computations happen in the network $N$
+and not in the function $f$ or the complexity of $F$, we add the hypothesis that $f$ should be
+computed on a Turing machine with linear complexity over the size of $\Sigma$, and that the
+the indicator function of $F$ should be computed on a Turing machine with linar complexity over the
+number of bits of $d$.
+
+We say that a class of seq-to-seq networks is Turing complete, if for every language $L$ decidable by a
+Turing machine, there exist a language recognizer with a seq-to-seq network in that class which
+accept exactly the strings in $L$.
+
+The main result in \cite{transformer-turing} is the following:
+\begin{block}[Theorem]
+    The class of transformer networks with positional encodings is Turing complete.
+\end{block}
+
+We point out however that the result holds only under the hypothesis of infinite precision, which is
+unrealistic in architectures of common usage.
+
 \subsubsection{The Llama-2 Models}
 
 The Llama-2 \cite{llama}, \cite{llama-2} are a family of LLMs sharing the same underlying
@@ -419,7 +508,42 @@ W_\text{down} (\text{Swish}(W_\text{gate} x) \odot W_\text{up} x) $$ This approa
 to have a better behaviour than a plain MLP layer.
 \end{enumerate}
 
-\subsection{Explainability}
+\subsection{Generative AI}
+
+Generative AI is a branch of Machine Learning whose objective is to sample new data from an unknown
+distribution, given a dataset of independent samples from that distribution.
+
+One possible approach that have been used is the one of Generative Adversarial Networks
+(GANs)\cite{gans}. The idea is to have a generator neural networks that generates synthetic samples
+from white noise, and a discriminator networks that should be able to tell synthetic samples from
+original ones. The two networks are then trained together, with the discriminator having the
+objective of making accurate prediction over the origin of its input, and the generator having the
+objective of ``being able to fool'' the discriminator. In other words, the discriminator weights are
+updated in such a way that try to minimize the loss associated to the classification task, while the
+weights of the generator are updated in such a way that try maximize that loss.
+
+Some problems however arise from training GANs. The first one is that the convergence of the joint
+training of the two networks is often hard. Some steps have been made to tackle this problem. WGANs
+\cite{wgans} are one possible improvement, for example. Another problem is that often generators end
+up sampling only a partial region of the whole distribution, the one that creates more difficulties
+to the discriminator.
+
+Another approach to generative AI, that has been proved very successful in the last years with
+popular models such as DALL-E \cite{dall-e}, is the one that uses variational autoencoders
+\cite{variational-autoencoders}.
+
+These models are again split in two parts, an encoder and a decoder. The decoder maps the samples in
+the dataset to vectors in a latent space, while the decoder tries to reconstruct the original data
+from the latent vector. The training has the objective of minimizing the reconstruction error while
+keeping the distribution of projections onto the latent space similar to white noise. After the
+training is complete, the generation is done by just sampling a latent vector from actual white
+noise and computing the sample through the decoder.
+
+Diffusion based models for generating images like DALL-E or Midjourney have an architecture very
+similar to variational autoencoders where the latent space has the same dimensionality of the sample
+data and the encoder is a function that adds random noise to an image.
+
+\subsection{Explainable AI}
 
 New AI based on deep-learning techonologies show outstanding State-of-the-Art performances in many
 fields. However, most of models based on deep-learning, random forests, or SVM are opaque, which
@@ -750,7 +874,6 @@ classifier, but will lead to longer explanations.
 
 \deb{We also notice that there is no metric available to understand how well the synthetic
 neighborhood represents the data distribution...}
-\subsection{Solution Proposal}
 
 \section{Implementation of the Solution}
 
